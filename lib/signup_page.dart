@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import 'login_page.dart';
 import 'TermsAndConditionsPage.dart';
-import 'package:provider/provider.dart';
 import 'package:surate/providers/auth_provider.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -21,14 +22,24 @@ class _SignUpPageState extends State<SignUpPage> {
   final _gradYearController = TextEditingController();
 
   @override
+  void dispose() {
+    _emailController.dispose();
+    _usernameController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    _gradYearController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF004990),
       body: Center(
         child: SingleChildScrollView(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              const SizedBox(height: 40),
               const Text(
                 "SuRate",
                 style: TextStyle(
@@ -43,66 +54,51 @@ class _SignUpPageState extends State<SignUpPage> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    _buildInput(
+                    _input(
                       "Email",
                       _emailController,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Email cannot be empty";
-                        }
-                        if (!value.contains("@")) {
-                          return "Enter a valid email";
-                        }
+                      validator: (v) {
+                        if (v == null || v.isEmpty) return "Email boş olamaz";
+                        if (!v.contains("@")) return "Geçerli email gir";
                         return null;
                       },
                     ),
-                    const SizedBox(height: 20),
-                    _buildInput(
+                    const SizedBox(height: 16),
+                    _input(
                       "Username",
                       _usernameController,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Username cannot be empty";
-                        }
-                        return null;
-                      },
+                      validator: (v) =>
+                      v == null || v.isEmpty ? "Username boş olamaz" : null,
                     ),
-                    const SizedBox(height: 20),
-                    _buildInput(
+                    const SizedBox(height: 16),
+                    _input(
                       "Password",
                       _passwordController,
-                      obscureText: true,
-                      validator: (value) {
-                        if (value == null || value.length < 6) {
-                          return "Password must be at least 6 characters";
-                        }
-                        return null;
-                      },
+                      obscure: true,
+                      validator: (v) =>
+                      v == null || v.length < 6
+                          ? "En az 6 karakter"
+                          : null,
                     ),
-                    const SizedBox(height: 20),
-                    _buildInput(
+                    const SizedBox(height: 16),
+                    _input(
                       "Confirm Password",
                       _confirmPasswordController,
-                      obscureText: true,
-                      validator: (value) {
-                        if (value != _passwordController.text) {
-                          return "Passwords do not match";
-                        }
-                        return null;
-                      },
+                      obscure: true,
+                      validator: (v) =>
+                      v != _passwordController.text
+                          ? "Şifreler eşleşmiyor"
+                          : null,
                     ),
-                    const SizedBox(height: 20),
-                    _buildInput(
+                    const SizedBox(height: 16),
+                    _input(
                       "Graduation Year",
                       _gradYearController,
-                      keyboardType: TextInputType.number,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Graduation year cannot be empty";
-                        }
-                        final year = int.tryParse(value);
+                      keyboard: TextInputType.number,
+                      validator: (v) {
+                        final year = int.tryParse(v ?? "");
                         if (year == null || year < 2024 || year > 2035) {
-                          return "Enter a valid graduation year";
+                          return "Geçerli mezuniyet yılı";
                         }
                         return null;
                       },
@@ -111,70 +107,60 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
               ),
 
-              const SizedBox(height: 40),
+              const SizedBox(height: 30),
 
 
               GestureDetector(
                 onTap: () async {
-                  if (_formKey.currentState!.validate()) {
-                    final auth = context.read<AuthProvider>();
+                  if (!_formKey.currentState!.validate()) return;
 
-                    try {
-                      await auth.register(
-                        _emailController.text.trim(),
-                        _passwordController.text.trim(),
-                      );
+                  final auth = context.read<AuthProvider>();
+
+                  try {
+
+                    await auth.register(
+                      _emailController.text.trim(),
+                      _passwordController.text.trim(),
+                    );
+
+                    if (!mounted) return;
+
+                    await auth.logout();
+
+                    if (!mounted) return;
 
 
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                          const TermsAndConditionsPage(),
-                        ),
-                      );
-                    } catch (e) {
-                      showDialog(
-                        context: context,
-                        builder: (_) => AlertDialog(
-                          title: const Text("Sign Up Failed"),
-                          content: Text(e.toString()),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text("OK"),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const TermsAndConditionsPage(),
+                      ),
+                    );
+                  } catch (e) {
+                    if (!mounted) return;
+                    showDialog(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                        title: const Text("Sign Up Failed"),
+                        content: Text(e.toString()),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text("OK"),
+                          ),
+                        ],
+                      ),
+                    );
                   }
                 },
-                child: Container(
-                  width: 200,
-                  height: 45,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFADD8FF),
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      "Sign Up",
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Color(0xFF004990),
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
+                child: _button("Sign Up"),
               ),
 
               const SizedBox(height: 20),
 
               GestureDetector(
                 onTap: () {
-                  Navigator.push(
+                  Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (_) => const LoginPage()),
                   );
@@ -184,21 +170,11 @@ class _SignUpPageState extends State<SignUpPage> {
                   style: TextStyle(
                     color: Colors.white,
                     decoration: TextDecoration.underline,
-                    fontSize: 14,
                   ),
                 ),
               ),
 
               const SizedBox(height: 40),
-
-
-              // Image.asset(
-              //   "assets/images/github_icon.png",
-              //   width: 40,
-              //   height: 40,
-              // ),
-
-              const SizedBox(height: 20),
             ],
           ),
         ),
@@ -206,32 +182,47 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-  Widget _buildInput(
+  Widget _input(
       String label,
       TextEditingController controller, {
+        bool obscure = false,
+        TextInputType? keyboard,
         required String? Function(String?) validator,
-        bool obscureText = false,
-        TextInputType? keyboardType,
       }) {
     return SizedBox(
       width: 320,
       child: TextFormField(
         controller: controller,
+        obscureText: obscure,
+        keyboardType: keyboard,
         validator: validator,
-        obscureText: obscureText,
-        keyboardType: keyboardType,
         decoration: InputDecoration(
           filled: true,
           fillColor: Colors.white,
           labelText: label,
-          labelStyle: const TextStyle(color: Colors.black),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          errorStyle: const TextStyle(
-            color: Colors.redAccent,
-            fontSize: 12,
-          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _button(String text) {
+    return Container(
+      width: 200,
+      height: 45,
+      decoration: BoxDecoration(
+        color: const Color(0xFFADD8FF),
+        borderRadius: BorderRadius.circular(30),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 18,
+          color: Color(0xFF004990),
+          fontWeight: FontWeight.bold,
         ),
       ),
     );

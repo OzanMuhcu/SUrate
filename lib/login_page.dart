@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'signup_page.dart';
 import 'package:provider/provider.dart';
+import 'signup_page.dart';
 import 'package:surate/providers/auth_provider.dart';
 
 class LoginPage extends StatefulWidget {
@@ -14,6 +14,13 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,37 +79,33 @@ class _LoginPageState extends State<LoginPage> {
 
               const SizedBox(height: 30),
 
-              /// 🔥 FIREBASE LOGIN
+
               GestureDetector(
                 onTap: () async {
-                  if (_formKey.currentState!.validate()) {
-                    final auth = context.read<AuthProvider>();
+                  if (!_formKey.currentState!.validate()) return;
 
-                    try {
-                      await auth.login(
-                        _emailController.text.trim(),
-                        _passwordController.text.trim(),
-                      );
+                  try {
+                    await context.read<AuthProvider>().login(
+                      _emailController.text.trim(),
+                      _passwordController.text.trim(),
+                    );
 
-                      // 🔑 AuthWrapper otomatik yönlendirir
-                      if (mounted) {
-                        setState(() {});
-                      }
-                    } catch (e) {
-                      showDialog(
-                        context: context,
-                        builder: (_) => AlertDialog(
-                          title: const Text("Login Failed"),
-                          content: Text(e.toString()),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text("OK"),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
+
+                  } catch (e) {
+                    if (!mounted) return;
+                    showDialog(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                        title: const Text("Login Failed"),
+                        content: Text(e.toString()),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text("OK"),
+                          ),
+                        ],
+                      ),
+                    );
                   }
                 },
                 child: Container(
@@ -145,15 +148,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
 
               const SizedBox(height: 40),
-
-              // Asset hatası varsa geçici olarak kapat
-              // Image.asset(
-              //   "assets/images/github_icon.png",
-              //   width: 40,
-              //   height: 40,
-              // ),
-
-              const SizedBox(height: 30),
             ],
           ),
         ),
