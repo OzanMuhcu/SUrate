@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "114779653856",
+    "project_id": "surate-65a27",
+    "storage_bucket": "surate-65a27.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:114779653856:android:696092a4032a0e48efb285",
+        "android_client_info": {
+          "package_name": "com.example.surate"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDDIsUMfAy0-2GuwRQfofAyWzRSGVNQGoM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
