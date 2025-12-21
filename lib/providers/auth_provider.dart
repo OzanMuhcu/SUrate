@@ -10,21 +10,25 @@ class AuthProvider extends ChangeNotifier {
   bool get isLoggedIn => _user != null;
 
   AuthProvider() {
-    _authService.authStateChanges.listen((user) {
+    // 🔥 Firebase auth session listener
+    FirebaseAuth.instance.authStateChanges().listen((user) {
       _user = user;
       notifyListeners();
     });
   }
 
-  Future<void> login(String email, String password) async {
+  // 🔐 LOGIN
+  Future<void> signIn(String email, String password) async {
     await _authService.signIn(email, password);
   }
 
-  Future<void> register(String email, String password) async {
+  // 📝 REGISTER
+  Future<void> signUp(String email, String password) async {
     await _authService.signUp(email, password);
   }
 
-  Future<void> logout() async {
+  // 🚪 LOGOUT
+  Future<void> signOut() async {
     await _authService.signOut();
   }
 }
