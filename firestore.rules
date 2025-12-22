@@ -1,0 +1,67 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function hasRequiredFields(data) {
+      return data.keys().hasAll(['id', 'createdBy', 'createdAt']) &&
+          data.id is string &&
+          data.createdBy is string &&
+          data.createdAt is timestamp;
+    }
+
+    function isOwner() {
+      return resource.data.createdBy == request.auth.uid;
+    }
+
+    match /courses/{docId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() &&
+          hasRequiredFields(request.resource.data) &&
+          request.resource.data.createdBy == request.auth.uid;
+      allow update: if isSignedIn() &&
+          hasRequiredFields(request.resource.data) &&
+          isOwner() &&
+          request.resource.data.createdBy == resource.data.createdBy;
+      allow delete: if isSignedIn() && isOwner();
+    }
+
+    match /comments/{docId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() &&
+          hasRequiredFields(request.resource.data) &&
+          request.resource.data.createdBy == request.auth.uid;
+      allow update: if isSignedIn() &&
+          hasRequiredFields(request.resource.data) &&
+          isOwner() &&
+          request.resource.data.createdBy == resource.data.createdBy;
+      allow delete: if isSignedIn() && isOwner();
+    }
+
+    match /ratings/{docId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() &&
+          hasRequiredFields(request.resource.data) &&
+          request.resource.data.createdBy == request.auth.uid;
+      allow update: if isSignedIn() &&
+          hasRequiredFields(request.resource.data) &&
+          isOwner() &&
+          request.resource.data.createdBy == resource.data.createdBy;
+      allow delete: if isSignedIn() && isOwner();
+    }
+
+    match /discussions/{docId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() &&
+          hasRequiredFields(request.resource.data) &&
+          request.resource.data.createdBy == request.auth.uid;
+      allow update: if isSignedIn() &&
+          hasRequiredFields(request.resource.data) &&
+          isOwner() &&
+          request.resource.data.createdBy == resource.data.createdBy;
+      allow delete: if isSignedIn() && isOwner();
+    }
+  }
+}
