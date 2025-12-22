@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:surate/providers/theme_provider.dart';
 
-import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'providers/auth_provider.dart';
+import 'providers/data_provider.dart';
 import 'wrappers/auth_wrapper.dart';
 
 void main() async {
@@ -22,6 +22,7 @@ void main() async {
             return themeProvider;
           },
         ),
+        ChangeNotifierProvider(create: (_) => DataProvider()),
       ],
       child: const MyApp(),
     ),
@@ -41,16 +42,16 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
             brightness: Brightness.light,
             primarySwatch: Colors.blue,
-            // Customize your light theme here
+            useMaterial3: true,
           ),
           darkTheme: ThemeData(
             brightness: Brightness.dark,
             scaffoldBackgroundColor: Colors.grey[400],
             primarySwatch: Colors.indigo,
-            // Customize your dark theme here
+            useMaterial3: true,
           ),
           themeMode: themeProvider.themeMode,
-          home: AuthWrapper(),
+          home: const AuthWrapper(),
         );
       },
     );

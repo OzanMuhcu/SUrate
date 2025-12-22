@@ -4,13 +4,10 @@ class Course {
   final String id;
   final String createdBy;
   final DateTime createdAt;
-
   final String code;
   final String name;
-
-  final String faculty; // FENS, FASS, SBS
-  final String major;   // CS, EE, ME, BIO...
-
+  final String faculty;
+  final String major; // CS, EE, ME, BIO...
   final double rating;
 
   const Course({

@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart'; // Provider paketi
 import 'profile_page.dart';
 import 'discussions.dart';
 import 'drawer.dart';
 import 'course_detail_page.dart';
-
 import 'filter_classes_page.dart';
+
+// Modeller ve Provider
+import 'package:surate/models/course.dart';
+import 'providers/data_provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -13,82 +17,70 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final List<Map<String, dynamic>> _allCourses = [
-    // CS Dersleri
-    {
-      "code": "CS 201",
-      "name": "Introduction to Computing",
-      "faculty": "CS",
-      "rating": 4.5,
-    },
-    {
-      "code": "CS 204",
-      "name": "Advanced Programming",
-      "faculty": "CS",
-      "rating": 4.2,
-    },
-    {
-      "code": "CS 300",
-      "name": "Data Structures",
-      "faculty": "CS",
-      "rating": 3.9,
-    },
-    // EE Dersleri
-    {
-      "code": "EE 201",
-      "name": "Analog Electronics",
-      "faculty": "EE",
-      "rating": 3.8,
-    },
-    {
-      "code": "EE 202",
-      "name": "Digital Circuits",
-      "faculty": "EE",
-      "rating": 4.1,
-    },
-    {
-      "code": "EE 306",
-      "name": "Signals and Systems",
-      "faculty": "EE",
-      "rating": 2.5,
-    },
-  ];
+  // Arama ve filtreleme state'leri
+  String _searchQuery = "";
+  String? _selectedCategory; // Drawer'dan seçilen kategori (Örn: "CS", "EE")
+  final TextEditingController _searchController = TextEditingController();
 
-  String _selectedFilter = "All";
-
-  List<Map<String, dynamic>> get _filteredCourses {
-    if (_selectedFilter == "All") {
-      return _allCourses;
-    } else {
-      return _allCourses
-          .where((course) => course['faculty'] == _selectedFilter)
-          .toList();
-    }
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
-  void _updateFilter(String category) {
+  // Kategoriyi temizleme veya seçme işlemi
+  void _handleCategorySelection(String categoryCode) {
     setState(() {
-      _selectedFilter = category;
+      // Eğer zaten seçili olana tekrar tıklanırsa filtreyi kaldır
+      if (_selectedCategory == categoryCode) {
+        _selectedCategory = null;
+      } else {
+        _selectedCategory = categoryCode;
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    // 1. PROVIDER'DAN VERİYİ ÇEK (Canlı dinleme)
+    final dataProvider = context.watch<DataProvider>();
+    final allCourses = dataProvider.courses;
+    final isLoading = dataProvider.isLoading;
+    final errorMessage = dataProvider.errorMessage;
+
+    // 2. FİLTRELEME MANTIĞI
+    // Hem arama çubuğuna hem de drawer seçimine göre listeyi daraltıyoruz.
+    final filteredCourses = allCourses.where((course) {
+      // Arama filtresi (İsim veya Kod)
+      final matchesSearch = course.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          course.code.toLowerCase().contains(_searchQuery.toLowerCase());
+
+      // Kategori filtresi (Drawer)
+      // Eğer kategori seçili değilse hepsi gelsin (true), seçiliyse kod o kategoriyle başlasın.
+      final matchesCategory = _selectedCategory == null ||
+          course.code.startsWith(_selectedCategory!);
+
+      return matchesSearch && matchesCategory;
+    }).toList();
+
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F5F5),
+
+      // --- APP BAR ---
       appBar: AppBar(
         backgroundColor: const Color(0xFF004990),
         iconTheme: const IconThemeData(color: Colors.white),
+        centerTitle: true,
         title: const Text(
           "SuRate",
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
-            fontSize: 40,
-            fontFamily: "Roboto",
+            fontSize: 22,
           ),
         ),
-        centerTitle: true,
         actions: [
+          // Profil İkonu
           Padding(
             padding: const EdgeInsets.only(right: 15),
             child: GestureDetector(
@@ -99,154 +91,122 @@ class _HomePageState extends State<HomePage> {
                 );
               },
               child: const CircleAvatar(
-                radius: 25,
+                radius: 18,
                 backgroundColor: Colors.white,
-                child: Icon(Icons.person, color: Color(0xFF004990), size: 30),
+                child: Icon(Icons.person, color: Color(0xFF004990)),
               ),
             ),
           ),
         ],
       ),
 
-      drawer: CustomDrawer(onCategorySelected: _updateFilter),
+      // --- DRAWER (Yan Menü) ---
+      drawer: CustomDrawer(
+        onCategorySelected: (category) {
+          // Drawer'dan gelen kategori bilgisini al ve state'i güncelle
+          _handleCategorySelection(category);
+        },
+      ),
 
+      // --- GÖVDE (BODY) ---
       body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 20),
-
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15),
-            child: SearchBar(
-              hintText: "Search for a course",
-              leading: const Icon(Icons.search),
-              trailing: [
-                IconButton(
-                  icon: const Icon(Icons.tune, color: Color(0xFF004990)),
-                  tooltip: "Advanced Filter",
+          // Arama Çubuğu
+          Container(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+            color: const Color(0xFFF5F5F5),
+            child: TextField(
+              controller: _searchController,
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value;
+                });
+              },
+              decoration: InputDecoration(
+                hintText: "Search for classes...",
+                prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: BorderSide.none,
+                ),
+                // Arama varsa temizleme (X) butonu göster
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                  icon: const Icon(Icons.clear, color: Colors.grey),
                   onPressed: () {
+                    _searchController.clear();
+                    setState(() {
+                      _searchQuery = "";
+                    });
+                  },
+                )
+                    : null,
+              ),
+            ),
+          ),
+
+          // Seçili kategori varsa göster (Kullanıcı neyi filtrelediğini görsün)
+          if (_selectedCategory != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+              child: Row(
+                children: [
+                  Text(
+                    "Filtering by: $_selectedCategory",
+                    style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF004990)),
+                  ),
+                  const SizedBox(width: 10),
+                  GestureDetector(
+                    onTap: () => _handleCategorySelection(_selectedCategory!), // Tıklayınca filtreyi kaldır
+                    child: const Icon(Icons.cancel, size: 20, color: Colors.redAccent),
+                  )
+                ],
+              ),
+            ),
+
+          // LİSTE İÇERİĞİ
+          Expanded(
+            child: isLoading
+                ? const Center(child: CircularProgressIndicator()) // Yükleniyor...
+                : errorMessage != null
+                ? Center(child: Text("Error: $errorMessage")) // Hata var...
+                : filteredCourses.isEmpty
+                ? const Center(
+              child: Text(
+                "No courses found.",
+                style: TextStyle(fontSize: 16, color: Colors.grey),
+              ),
+            )
+                : ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              itemCount: filteredCourses.length,
+              itemBuilder: (context, index) {
+                final course = filteredCourses[index];
+
+                return _buildClassCard(
+                  context,
+                  code: course.code,
+                  name: course.name,
+                  faculty: course.faculty,
+                  rating: course.rating,
+                  onTap: () {
+                    // Detay sayfasına git
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const FilterClassesPage(),
+                        builder: (context) => CourseDetailPage(
+                          // CourseDetailPage Map beklediği için dönüşüm yapıyoruz
+                          courseData: course.toMap(),
+                        ),
                       ),
                     );
                   },
-                ),
-              ],
+                );
+              },
             ),
-          ),
-
-          const SizedBox(height: 20),
-
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  _selectedFilter == "All"
-                      ? "All Courses"
-                      : "$_selectedFilter Courses",
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF004990),
-                  ),
-                ),
-
-                if (_selectedFilter != "All")
-                  TextButton(
-                    onPressed: () => _updateFilter("All"),
-                    child: const Text("Clear Filter"),
-                  ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 10),
-
-          Expanded(
-            child: _filteredCourses.isEmpty
-                ? const Center(
-                    child: Text("No courses found in this category."),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 15),
-                    itemCount: _filteredCourses.length,
-                    itemBuilder: (context, index) {
-                      final course = _filteredCourses[index];
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  CourseDetailPage(courseData: course),
-                            ),
-                          );
-                        },
-                        child: Card(
-                          elevation: 4,
-                          margin: const EdgeInsets.only(bottom: 15),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: ListTile(
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 10,
-                            ),
-                            leading: CircleAvatar(
-                              backgroundColor: const Color(0xFFE3F2FD),
-                              child: Text(
-                                course['faculty'],
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF004990),
-                                ),
-                              ),
-                            ),
-                            title: Text(
-                              course['code'],
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            subtitle: Text(course['name']),
-                            trailing: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.amber[100],
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.star,
-                                    size: 16,
-                                    color: Colors.orange,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    course['rating'].toString(),
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
           ),
         ],
       ),
@@ -261,14 +221,15 @@ class _HomePageState extends State<HomePage> {
               MaterialPageRoute(builder: (context) => const DiscussionsPage()),
             );
           },
+          behavior: HitTestBehavior.opaque, // Tıklama alanını genişletir
           child: Container(
             height: 60,
-            color: Colors.transparent,
+            alignment: Alignment.center,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: const [
-                Icon(Icons.message, color: Colors.white, size: 40),
-                SizedBox(width: 15),
+                Icon(Icons.message, color: Colors.white, size: 30),
+                SizedBox(width: 10),
                 Text(
                   "Discussion",
                   style: TextStyle(
@@ -279,6 +240,95 @@ class _HomePageState extends State<HomePage> {
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Kart Tasarımı (Değişmedi, sadece veri dinamikleşti)
+  Widget _buildClassCard(
+      BuildContext context, {
+        required String code,
+        required String name,
+        required String faculty,
+        required double rating,
+        required VoidCallback onTap,
+      }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 15),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(15),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(15),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 5,
+                offset: Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "$code - $faculty",
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: rating >= 4.0
+                      ? Colors.green.withOpacity(0.2)
+                      : (rating >= 2.5
+                      ? Colors.orange.withOpacity(0.2)
+                      : Colors.red.withOpacity(0.2)),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.star,
+                      size: 16,
+                      color: rating >= 4.0
+                          ? Colors.green
+                          : (rating >= 2.5 ? Colors.orange : Colors.red),
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      rating.toStringAsFixed(1), // Örn: 4.5
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
