@@ -6,6 +6,8 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+
     return Scaffold(
       backgroundColor: Colors.white,
 
@@ -48,18 +50,26 @@ class ProfilePage extends StatelessWidget {
 
                   const SizedBox(height: 12),
 
-                  const Text(
-                    "Yağmur Geçim",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  // ✅ DİNAMİK İSİM
+                  Text(
+                    user?.displayName ?? "İsim yok",
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
 
                   const SizedBox(height: 4),
-                  const Text(
-                    "yagmur@sabanci.com",
-                    style: TextStyle(color: Colors.black54),
+
+                  // ✅ DİNAMİK EMAIL
+                  Text(
+                    user?.email ?? "Email yok",
+                    style: const TextStyle(color: Colors.black54),
                   ),
 
                   const SizedBox(height: 4),
+
+                  // (İstersen bunu sonra Firestore’dan çekersin)
                   const Text(
                     "Class of 2028",
                     style: TextStyle(color: Colors.black54),
@@ -74,8 +84,6 @@ class ProfilePage extends StatelessWidget {
                   /// 🔴 GERÇEK LOGOUT
                   _buildButton("Logout", () async {
                     await FirebaseAuth.instance.signOut();
-
-                    // AuthWrapper otomatik LoginPage'e döner
                     Navigator.of(context).popUntil((route) => route.isFirst);
                   }),
                 ],

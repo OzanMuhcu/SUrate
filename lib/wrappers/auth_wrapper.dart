@@ -1,19 +1,33 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-import 'package:surate/providers/auth_provider.dart';
-import 'package:surate/login_page.dart';
-import 'package:surate/MainPage.dart'; // dosya adı aynı kalıyor
+// 🔥 DOĞRU IMPORTLAR (bir üst klasör)
+import '../login_page.dart';
+import '../MainPage.dart';
 
 class AuthWrapper extends StatelessWidget {
+  const AuthWrapper({super.key});
+
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        // Firebase auth kontrol ederken
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
 
-    if (auth.isLoggedIn) {
-      return HomePage();   
-    } else {
-      return LoginPage();
-    }
+        // Login olmuşsa
+        if (snapshot.hasData) {
+          return HomePage(); // MainPage.dart içindeki class
+        }
+
+        // Login değilse
+        return LoginPage(); // ❌ const YOK
+      },
+    );
   }
 }
