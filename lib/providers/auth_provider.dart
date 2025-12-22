@@ -22,8 +22,9 @@ class AuthProvider extends ChangeNotifier {
   }
 
 
-  Future<void> register(String email, String password) async {
-    await _authService.signUp(email, password);
+  Future<void> register(String email, String password, String name) async {
+    final user = await _authService.signUp(email, password);
+    await user?.updateDisplayName(name);
   }
 
 

@@ -6,11 +6,8 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-
     return Scaffold(
       backgroundColor: Colors.white,
-
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -25,85 +22,77 @@ class ProfilePage extends StatelessWidget {
           },
         ),
       ),
+      body: StreamBuilder<User?>(
+          stream: FirebaseAuth.instance.userChanges(),
+          builder: (context, snapshot) {
+            final user = snapshot.data;
 
-      body: Column(
-        children: [
-          const Text(
-            "SuRate",
-            style: TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF004990),
-            ),
-          ),
-
-          Expanded(
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const CircleAvatar(
-                    radius: 45,
-                    backgroundColor: Color(0xFFE0D9FF),
-                    child: Icon(Icons.person, size: 45, color: Colors.black87),
+            return Column(
+              children: [
+                const Text(
+                  "SuRate",
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF004990),
                   ),
-
-                  const SizedBox(height: 12),
-
-                  // ✅ DİNAMİK İSİM
-                  Text(
-                    user?.displayName ?? "İsim yok",
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                ),
+                Expanded(
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const CircleAvatar(
+                          radius: 45,
+                          backgroundColor: Color(0xFFE0D9FF),
+                          child:
+                              Icon(Icons.person, size: 45, color: Colors.black87),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          user?.displayName ?? "İsim yok",
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          user?.email ?? "Email yok",
+                          style: const TextStyle(color: Colors.black54),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          "Class of 2028",
+                          style: TextStyle(color: Colors.black54),
+                        ),
+                        const SizedBox(height: 30),
+                        _buildButton("Change Username", () {}),
+                        _buildButton("Change Password", () {}),
+                        _buildButton("Delete Account", () {}),
+                        _buildButton("Logout", () async {
+                          await FirebaseAuth.instance.signOut();
+                          if (context.mounted) {
+                            Navigator.of(context)
+                                .popUntil((route) => route.isFirst);
+                          }
+                        }),
+                      ],
                     ),
                   ),
-
-                  const SizedBox(height: 4),
-
-                  // ✅ DİNAMİK EMAIL
-                  Text(
-                    user?.email ?? "Email yok",
-                    style: const TextStyle(color: Colors.black54),
-                  ),
-
-                  const SizedBox(height: 4),
-
-                  // (İstersen bunu sonra Firestore’dan çekersin)
-                  const Text(
-                    "Class of 2028",
-                    style: TextStyle(color: Colors.black54),
-                  ),
-
-                  const SizedBox(height: 30),
-
-                  _buildButton("Change Username", () {}),
-                  _buildButton("Change Password", () {}),
-                  _buildButton("Delete Account", () {}),
-
-                  /// 🔴 GERÇEK LOGOUT
-                  _buildButton("Logout", () async {
-                    await FirebaseAuth.instance.signOut();
-                    Navigator.of(context).popUntil((route) => route.isFirst);
-                  }),
-                ],
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 10),
-
-          Image.asset(
-            "assets/images/github_icon.png",
-            width: 40,
-            height: 40,
-            errorBuilder: (ctx, err, stack) =>
-            const Icon(Icons.code, size: 40),
-          ),
-
-          const SizedBox(height: 30),
-        ],
-      ),
+                ),
+                const SizedBox(height: 10),
+                Image.asset(
+                  "assets/images/github_icon.png",
+                  width: 40,
+                  height: 40,
+                  errorBuilder: (ctx, err, stack) =>
+                      const Icon(Icons.code, size: 40),
+                ),
+                const SizedBox(height: 30),
+              ],
+            );
+          }),
     );
   }
 

@@ -119,23 +119,17 @@ class _SignUpPageState extends State<SignUpPage> {
                 onTap: () async {
                   if (!_formKey.currentState!.validate()) return;
 
-                  // 🔥 DÜZELTME 2: En garanti yöntem budur.
                   final auth = Provider.of<AuthProvider>(context, listen: false);
 
                   try {
-                    // 1. Kayıt Ol (Firebase burada otomatik giriş yapar)
                     await auth.register(
                       _emailController.text.trim(),
                       _passwordController.text.trim(),
+                      _usernameController.text.trim(),
                     );
-
-                    // 2. 🔥 KRİTİK HAMLE: Otomatik girişi iptal et (Logout yap)
-                    // Böylece AuthWrapper, Home sayfasını açmaya çalışmaz.
-                    await FirebaseAuth.instance.signOut();
-
+                    
                     if (!mounted) return;
 
-                    // 3. Terms sayfasına yönlendir (Geri gelmeyi engelle)
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
@@ -167,8 +161,6 @@ class _SignUpPageState extends State<SignUpPage> {
 
               GestureDetector(
                 onTap: () {
-                  // Giriş sayfasına dönmek için en temiz yol: AuthWrapper'a dönmek
-                  // Bu sayede tüm geçmiş temizlenir.
                   Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(builder: (_) => const AuthWrapper()),

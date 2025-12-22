@@ -12,11 +12,12 @@ class AuthService {
     );
   }
 
-  Future<void> signUp(String email, String password) async {
-    await _auth.createUserWithEmailAndPassword(
+  Future<User?> signUp(String email, String password) async {
+    final result = await _auth.createUserWithEmailAndPassword(
       email: email,
       password: password,
     );
+    return result.user;
   }
 
   Future<void> signOut() async {

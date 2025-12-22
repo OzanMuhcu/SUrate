@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:surate/main.dart';
 import 'welcome_page.dart';
-import 'login_page.dart';
 
-// Renkleri sabit tanımlamışsın, gayet güzel.
 const Color primaryBlue = Color(0xFF007ACC);
 const Color lightBlueAccent = Color(0xFFE3F2FD);
 const Color lightestBlueBorder = Color(0xFF90CAF9);
@@ -51,7 +50,7 @@ class _TermsAndConditionsPageState extends State<TermsAndConditionsPage> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Center(
-                    child: SingleChildScrollView( // Metin uzun olursa kaydırmak için
+                    child: SingleChildScrollView(
                       child: Text(
                         'This is sample text.\n\n(Buraya uzun sözleşme metni gelecek...)',
                         textAlign: TextAlign.center,
@@ -83,7 +82,7 @@ class _TermsAndConditionsPageState extends State<TermsAndConditionsPage> {
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
-                  Expanded( // Tıklanabilir alanı genişlettim
+                  Expanded(
                     child: GestureDetector(
                       onTap: () {
                         setState(() {
@@ -126,7 +125,6 @@ class _TermsAndConditionsPageState extends State<TermsAndConditionsPage> {
                       ),
                       child: TextButton(
                         onPressed: () {
-                          // Geri giderken her şeyi silip Welcome'a dönmesi doğru
                           Navigator.pushAndRemoveUntil(
                             context,
                             MaterialPageRoute(
@@ -171,14 +169,14 @@ class _TermsAndConditionsPageState extends State<TermsAndConditionsPage> {
                       child: ElevatedButton(
                         onPressed: _isAccepted
                             ? () {
-                          /// 🔥 KRİTİK DEĞİŞİKLİK BURADA 🔥
-                          /// push yerine pushReplacement kullanıyoruz.
-                          /// Böylece Terms sayfası kapanıyor, Login sayfası açılıyor.
-                          Navigator.pushReplacement(
+                          Navigator.pushAndRemoveUntil(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => const LoginPage(),
+                              // CHANGE IS HERE: Changed MainPage() to MyApp()
+                              // Make sure 'MyApp' is the name of the class in lib/main.dart
+                              builder: (_) => const MyApp(),
                             ),
+                                (route) => false,
                           );
                         }
                             : null,
