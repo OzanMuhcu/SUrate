@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:surate/providers/auth_provider.dart';
 
 // --- MODELLER ---
 // Eğer proje isminiz 'surate' değilse buraları değiştirin
@@ -10,6 +11,7 @@ import 'package:surate/models/comment.dart';
 
 class DataProvider extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  AuthProvider? _auth;
 
   // --- STATE DEĞİŞKENLERİ ---
   List<Course> _courses = [];
@@ -27,8 +29,24 @@ class DataProvider extends ChangeNotifier {
   StreamSubscription? _courseSubscription;
   StreamSubscription? _discussionSubscription;
 
-  DataProvider() {
-    _initData();
+  DataProvider();
+
+  void updateUser(AuthProvider auth) {
+    if (_auth?.user == auth.user) {
+      return;
+    }
+    _auth = auth;
+
+    _courseSubscription?.cancel();
+    _discussionSubscription?.cancel();
+
+    if (auth.isLoggedIn) {
+      _initData();
+    } else {
+      _courses = [];
+      _discussions = [];
+      notifyListeners();
+    }
   }
 
   void _initData() {

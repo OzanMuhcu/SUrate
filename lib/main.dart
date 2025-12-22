@@ -22,7 +22,13 @@ void main() async {
             return themeProvider;
           },
         ),
-        ChangeNotifierProvider(create: (_) => DataProvider()),
+        ChangeNotifierProxyProvider<AuthProvider, DataProvider>(
+          create: (_) => DataProvider(),
+          update: (_, auth, dataProvider) {
+            dataProvider!.updateUser(auth);
+            return dataProvider;
+          },
+        ),
       ],
       child: const MyApp(),
     ),
