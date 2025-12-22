@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-// Modeller ve Provider'lar
 import 'package:surate/models/discussion.dart';
 import 'package:surate/providers/data_provider.dart';
 import 'package:surate/providers/auth_provider.dart';
 
-// Yeni oluşturduğumuz detay sayfasını import ediyoruz
 import 'discussion_detail_page.dart';
 
 class DiscussionsPage extends StatelessWidget {
@@ -62,7 +60,6 @@ class DiscussionsPage extends StatelessWidget {
                         : (index % 3 == 1
                         ? const Color(0xFFE3F2FD)
                         : const Color(0xFFE8F5E9)),
-                    // --- Tıklama Olayı Eklendi ---
                     onTap: () {
                       Navigator.push(
                         context,
@@ -155,13 +152,13 @@ class _DiscussionBlock extends StatelessWidget {
   final String creator;
   final String title;
   final Color color;
-  final VoidCallback onTap; // Yeni parametre: Tıklama fonksiyonu
+  final VoidCallback onTap;
 
   const _DiscussionBlock({
     required this.creator,
     required this.title,
     required this.color,
-    required this.onTap, // Constructor'a eklendi
+    required this.onTap,
   });
 
   @override
@@ -175,7 +172,7 @@ class _DiscussionBlock extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         InkWell(
-          onTap: onTap, // Burası artık dışarıdan gelen fonksiyonu çağırıyor
+          onTap: onTap,
           borderRadius: BorderRadius.circular(16),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),

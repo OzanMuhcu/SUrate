@@ -4,7 +4,7 @@ import 'package:surate/models/comment.dart';
 import 'package:surate/models/course.dart';
 import 'package:surate/providers/auth_provider.dart';
 import 'package:surate/providers/data_provider.dart';
-import 'RatePage.dart'; // ✅ DÜZELTİLDİ: Senin dosya adın bu.
+import 'RatePage.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 class CourseDetailPage extends StatefulWidget {
@@ -24,7 +24,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
     final dataProvider = context.watch<DataProvider>();
     final authProvider = context.watch<AuthProvider>();
 
-    // Canlı veri çekme
+
     Course? liveCourse;
     try {
       liveCourse = dataProvider.courses.firstWhere((c) => c.id == courseId);
@@ -47,7 +47,6 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
         title: Text(courseCode, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24)),
       ),
 
-      // ✅ RatePage'e gitme butonu (DÜZELTİLDİ)
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           if (authProvider.user == null) {
@@ -58,8 +57,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
             context,
             MaterialPageRoute(
               builder: (context) => RateCoursePage(
-                courseId: courseId,     // ✅ ID GÖNDERİLİYOR
-                courseCode: courseCode, // ✅ KOD GÖNDERİLİYOR
+                courseId: courseId,
+                courseCode: courseCode,
               ),
             ),
           );
@@ -103,7 +102,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                     final uid = authProvider.user?.uid;
                     return _CommentCard(
                       author: c.authorName, date: _formatDate(c.createdAt), comment: c.text,
-                      likeCount: c.likeCount, dislikeCount: c.dislikeCount, rating: c.rating, // ✅ Rating artık Comment'te var
+                      likeCount: c.likeCount, dislikeCount: c.dislikeCount, rating: c.rating,
                       isLiked: uid != null && c.likedBy.contains(uid),
                       isDisliked: uid != null && c.dislikedBy.contains(uid),
                       onLike: () => _handleReaction(context, courseId, c.id, true),

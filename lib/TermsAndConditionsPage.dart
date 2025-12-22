@@ -152,7 +152,6 @@ class _TermsAndConditionsPageState extends State<TermsAndConditionsPage> {
                   ),
                   const SizedBox(width: 15),
 
-                  // "Move On" Button
                   Expanded(
                     child: Container(
                       height: 50,
@@ -172,8 +171,6 @@ class _TermsAndConditionsPageState extends State<TermsAndConditionsPage> {
                           Navigator.pushAndRemoveUntil(
                             context,
                             MaterialPageRoute(
-                              // CHANGE IS HERE: Changed MainPage() to MyApp()
-                              // Make sure 'MyApp' is the name of the class in lib/main.dart
                               builder: (_) => const MyApp(),
                             ),
                                 (route) => false,

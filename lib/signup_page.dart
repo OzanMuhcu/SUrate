@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-// 🔥 DÜZELTME 1: İsim çakışmasını önlemek için 'hide AuthProvider' ekledik
 import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 
 import 'login_page.dart';
 import 'TermsAndConditionsPage.dart';
 import 'package:surate/providers/auth_provider.dart';
 
-// Dosya yolun farklıysa burayı düzelt (örn: ../wrappers/auth_wrapper.dart)
 import 'wrappers/auth_wrapper.dart';
 
 class SignUpPage extends StatefulWidget {

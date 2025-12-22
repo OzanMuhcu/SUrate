@@ -11,7 +11,7 @@ class Comment {
   final int dislikeCount;
   final List<String> likedBy;
   final List<String> dislikedBy;
-  final double rating; // ✅ EKLENDİ
+  final double rating;
 
   Comment({
     required this.id,
@@ -24,7 +24,7 @@ class Comment {
     required this.dislikeCount,
     required this.likedBy,
     required this.dislikedBy,
-    this.rating = 0.0, // ✅ Varsayılan değer
+    this.rating = 0.0,
   });
 
   factory Comment.fromFirestore(Map<String, dynamic> data, String id) {
@@ -39,7 +39,7 @@ class Comment {
       dislikeCount: (data['dislikeCount'] as num?)?.toInt() ?? 0,
       likedBy: List<String>.from(data['likedBy'] ?? []),
       dislikedBy: List<String>.from(data['dislikedBy'] ?? []),
-      rating: (data['rating'] as num?)?.toDouble() ?? 0.0, // ✅ EKLENDİ
+      rating: (data['rating'] as num?)?.toDouble() ?? 0.0,
     );
   }
 

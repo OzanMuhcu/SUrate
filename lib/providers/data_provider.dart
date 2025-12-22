@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-// Modellerini import et (Yolları kendine göre düzeltmen gerekebilir)
 import 'package:surate/models/course.dart';
 import 'package:surate/models/discussion.dart';
 import 'package:surate/models/comment.dart';
@@ -11,7 +10,6 @@ import 'package:surate/models/comment.dart';
 class DataProvider extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // --- STATE DEĞİŞKENLERİ ---
   User? _user;
   List<Course> _courses = [];
   List<Discussion> _discussions = [];
@@ -27,17 +25,16 @@ class DataProvider extends ChangeNotifier {
   StreamSubscription? _courseSubscription;
   StreamSubscription? _discussionSubscription;
 
-  // Constructor BOŞ. Veriyi updateAuth başlatacak.
   DataProvider();
 
-  // --- AUTH ENTEGRASYONU ---
+
   void updateAuth(User? user) {
     _user = user;
     _courseSubscription?.cancel();
     _discussionSubscription?.cancel();
 
     if (_user != null) {
-      _initData(); // Giriş yapıldıysa verileri çek
+      _initData();
     } else {
       _courses = [];
       _discussions = [];
@@ -45,14 +42,12 @@ class DataProvider extends ChangeNotifier {
     }
   }
 
-  // --- REALTIME VERİ ÇEKME ---
   void _initData() {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      // 1. DERSLERİ DİNLE
       _courseSubscription = _firestore.collection('courses').snapshots().listen(
             (snapshot) {
           _courses = snapshot.docs.map((doc) {
@@ -68,7 +63,6 @@ class DataProvider extends ChangeNotifier {
         },
       );
 
-      // 2. TARTIŞMALARI DİNLE
       _discussionSubscription = _firestore
           .collection('discussions')
           .orderBy('createdAt', descending: true)
@@ -91,10 +85,6 @@ class DataProvider extends ChangeNotifier {
     }
   }
 
-  // ==========================================
-  //          KURS PUANLAMA & YORUM (ÖNEMLİ)
-  // ==========================================
-
   Future<void> submitCourseReview({
     required String courseId,
     required String userId,
@@ -105,7 +95,7 @@ class DataProvider extends ChangeNotifier {
     final courseRef = _firestore.collection('courses').doc(courseId);
     final commentRef = courseRef.collection('comments').doc();
 
-    // Transaction ile güvenli güncelleme (Puanlar karışmasın diye)
+
     await _firestore.runTransaction((transaction) async {
       final courseSnapshot = await transaction.get(courseRef);
       if (!courseSnapshot.exists) throw Exception("Course not found!");
@@ -114,17 +104,17 @@ class DataProvider extends ChangeNotifier {
       final currentRating = (data['rating'] as num?)?.toDouble() ?? 0.0;
       final currentCount = (data['ratingCount'] as num?)?.toInt() ?? 0;
 
-      // Yeni Ortalama Hesabı
+
       final newCount = currentCount + 1;
       final newRating = ((currentRating * currentCount) + userRating) / newCount;
 
-      // Kursu Güncelle
+
       transaction.update(courseRef, {
         'rating': newRating,
         'ratingCount': newCount,
       });
 
-      // Yorumu Ekle
+
       transaction.set(commentRef, {
         'text': commentText,
         'rating': userRating,
@@ -140,9 +130,6 @@ class DataProvider extends ChangeNotifier {
     });
   }
 
-  // ==========================================
-  //            DISCUSSION İŞLEMLERİ
-  // ==========================================
 
   Future<void> addDiscussion(String title, String body, String courseId, String creatorName, String userId) async {
     await _firestore.collection('discussions').add({
@@ -181,15 +168,12 @@ class DataProvider extends ChangeNotifier {
     });
   }
 
-  // Discussion Yorumuna Like
+
   Future<void> reactToDiscussionComment({required String discussionId, required String commentId, required String userId, required bool isLike}) async {
     final commentRef = _firestore.collection('discussions').doc(discussionId).collection('comments').doc(commentId);
     await _updateCommentReaction(commentRef: commentRef, userId: userId, isLike: isLike);
   }
 
-  // ==========================================
-  //              COURSE İŞLEMLERİ
-  // ==========================================
 
   Stream<List<Comment>> getCourseCommentsStream(String courseId) {
     return _firestore
@@ -203,13 +187,13 @@ class DataProvider extends ChangeNotifier {
     });
   }
 
-  // Course Yorumuna Like
+
   Future<void> reactToCourseComment({required String courseId, required String commentId, required String userId, required bool isLike}) async {
     final commentRef = _firestore.collection('courses').doc(courseId).collection('comments').doc(commentId);
     await _updateCommentReaction(commentRef: commentRef, userId: userId, isLike: isLike);
   }
 
-  // --- ORTAK LIKE/DISLIKE MANTIĞI ---
+
   Future<void> _updateCommentReaction({required DocumentReference<Map<String, dynamic>> commentRef, required String userId, required bool isLike}) async {
     await _firestore.runTransaction((transaction) async {
       final snapshot = await transaction.get(commentRef);
@@ -237,7 +221,7 @@ class DataProvider extends ChangeNotifier {
         'likedBy': likedBy,
         'dislikedBy': dislikedBy,
         'likeCount': likeCount,
-        'dislikeCount': dislikeCount < 0 ? 0 : dislikeCount, // Negatif olmasın
+        'dislikeCount': dislikeCount < 0 ? 0 : dislikeCount,
       });
     });
   }

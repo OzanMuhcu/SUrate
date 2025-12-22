@@ -13,10 +13,8 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        // 1. AUTH PROVIDER
         ChangeNotifierProvider(create: (_) => AuthProvider()),
 
-        // 2. THEME PROVIDER (Auth'a bağlı)
         ChangeNotifierProxyProvider<AuthProvider, ThemeProvider>(
           create: (context) => ThemeProvider(),
           update: (context, auth, themeProvider) {
@@ -25,11 +23,9 @@ void main() async {
           },
         ),
 
-        // 3. DATA PROVIDER (ARTIK AUTH'A BAĞLI - ÇÖZÜM BURADA ✅)
         ChangeNotifierProxyProvider<AuthProvider, DataProvider>(
           create: (_) => DataProvider(),
           update: (context, auth, dataProvider) {
-            // Kullanıcı değişince DataProvider'a haber ver!
             dataProvider!.updateAuth(auth.user);
             return dataProvider;
           },

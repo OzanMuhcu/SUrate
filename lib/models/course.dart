@@ -7,9 +7,9 @@ class Course {
   final String code;
   final String name;
   final String faculty;
-  final String major; // CS, EE, ME, BIO...
+  final String major;
   final double rating;
-  final int ratingCount; // ✅ EKLENDİ: Ortalama hesabı için şart!
+  final int ratingCount;
 
   const Course({
     required this.id,
@@ -20,7 +20,7 @@ class Course {
     required this.faculty,
     required this.major,
     required this.rating,
-    required this.ratingCount, // ✅ EKLENDİ
+    required this.ratingCount,
   });
 
   factory Course.fromFirestore(Map<String, dynamic> data, String id) {
@@ -32,9 +32,9 @@ class Course {
       name: data['name'] as String? ?? '',
       faculty: data['faculty'] as String? ?? '',
       major: data['major'] as String? ?? '',
-      // Sayısal değerleri güvenli çeviriyoruz (null gelirse patlamasın diye)
+
       rating: (data['rating'] as num?)?.toDouble() ?? 0.0,
-      ratingCount: (data['ratingCount'] as num?)?.toInt() ?? 0, // ✅ EKLENDİ
+      ratingCount: (data['ratingCount'] as num?)?.toInt() ?? 0,
     );
   }
 
@@ -48,11 +48,11 @@ class Course {
       'faculty': faculty,
       'major': major,
       'rating': rating,
-      'ratingCount': ratingCount, // ✅ EKLENDİ
+      'ratingCount': ratingCount,
     };
   }
 
-  // Tarih formatını güvenli çeviren yardımcı metod
+
   static DateTime _parseCreatedAt(dynamic value) {
     if (value is Timestamp) {
       return value.toDate();

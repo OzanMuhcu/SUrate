@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 
-// Use the existing color definitions for consistency
-const Color primaryBlue = Color(0xFF007ACC); // A standard, deep blue
+const Color primaryBlue = Color(0xFF007ACC);
 const Color lightBlueAccent = Color(
   0xFFE3F2FD,
-); // Very light blue for background/fill
+);
 const Color darkestBlue = Color(
   0xFF0D47A1,
-); // Slightly darker blue for contrast
+);
 
 class InteractiveRatingStars extends StatelessWidget {
   final double rating;
@@ -184,7 +183,6 @@ class _FilterClassesPageState extends State<FilterClassesPage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24.0,
@@ -200,7 +198,6 @@ class _FilterClassesPageState extends State<FilterClassesPage> {
                 ),
               ),
               const Divider(),
-              // Options List
               ListView.builder(
                 shrinkWrap: true,
                 itemCount: options.length,
@@ -255,7 +252,6 @@ class _FilterClassesPageState extends State<FilterClassesPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        // 🔥 GÜNCELLENEN KISIM: Geri Butonu
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: primaryBlue),
           onPressed: () {

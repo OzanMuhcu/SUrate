@@ -32,14 +32,11 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => _loading = true);
 
     try {
-      // Doğrudan Firebase yerine Provider kullanıyoruz.
-      // listen: false, çünkü burada sadece bir aksiyon tetikliyoruz.
       await context.read<AuthProvider>().login(
         _emailController.text.trim(),
         _passwordController.text,
       );
 
-      // Başarılı olursa AuthWrapper otomatik olarak sayfayı değiştirecek.
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -84,7 +81,6 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     const SizedBox(height: 40),
 
-                    // E-Mail Input
                     _input(
                       "Email",
                       _emailController,
@@ -101,7 +97,6 @@ class _LoginPageState extends State<LoginPage> {
 
                     const SizedBox(height: 20),
 
-                    // Password Input
                     _input(
                       "Password",
                       _passwordController,
@@ -119,14 +114,12 @@ class _LoginPageState extends State<LoginPage> {
 
                     const SizedBox(height: 30),
 
-                    // Login Button
                     _loading
                         ? const CircularProgressIndicator(color: Colors.white)
                         : _button("Login", _login),
 
                     const SizedBox(height: 20),
 
-                    // Sign Up Link
                     GestureDetector(
                       onTap: () {
                         Navigator.push(

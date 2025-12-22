@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:provider/provider.dart';
-// ÇAKIŞMAYI ÖNLEMEK İÇİN 'hide AuthProvider' EKLENDİ 👇
 import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'providers/data_provider.dart';
 import 'providers/auth_provider.dart';

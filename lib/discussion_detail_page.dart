@@ -12,7 +12,6 @@ class DiscussionDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // DataProvider'dan stream'i alıyoruz
     final dataProvider = Provider.of<DataProvider>(context, listen: false);
 
     return Scaffold(
@@ -29,10 +28,9 @@ class DiscussionDetailPage extends StatelessWidget {
       ),
       body: Column(
         children: [
-          // --- ÜST KISIM: TARTIŞMA İÇERİĞİ ---
           Container(
             padding: const EdgeInsets.all(16.0),
-            color: Colors.grey[100], // Ayırt edici arka plan
+            color: Colors.grey[100],
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -80,10 +78,8 @@ class DiscussionDetailPage extends StatelessWidget {
 
           const Divider(thickness: 1, height: 1),
 
-          // --- ALT KISIM: YORUMLAR (STREAM BUILDER) ---
           Expanded(
             child: StreamBuilder<List<Comment>>(
-              // DataProvider'daki stream fonksiyonunu çağırıyoruz
               stream: dataProvider.getCommentsStream(discussion.id),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -158,7 +154,6 @@ class DiscussionDetailPage extends StatelessWidget {
     );
   }
 
-  // Tarih formatlamak için basit bir yardımcı
   String _formatDate(DateTime date) {
     return "${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute}";
   }
@@ -170,10 +165,10 @@ class DiscussionDetailPage extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text("Write a Reply"),
-        // SingleChildScrollView ekledik: Klavye açılınca taşmayı önler
+
         content: SingleChildScrollView(
           child: Column(
-            mainAxisSize: MainAxisSize.min, // İçerik kadar yer kapla
+            mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: commentController,
@@ -182,7 +177,7 @@ class DiscussionDetailPage extends StatelessWidget {
                   border: OutlineInputBorder(),
                 ),
                 maxLines: 3,
-                keyboardType: TextInputType.multiline, // Çok satırlı klavye
+                keyboardType: TextInputType.multiline,
               ),
             ],
           ),
@@ -199,15 +194,12 @@ class DiscussionDetailPage extends StatelessWidget {
             onPressed: () async {
               if (commentController.text.trim().isEmpty) return;
 
-              // Provider'a erişim
               final authProvider = context.read<AuthProvider>();
               final dataProvider = context.read<DataProvider>();
               final user = authProvider.user;
 
               if (user != null) {
                 try {
-                  // Yükleniyor göstergesi (Opsiyonel ama iyi olur)
-                  // Navigator.pop(ctx); // Önce dialogu kapat
 
                   await dataProvider.addComment(
                     discussion.id,
@@ -217,11 +209,9 @@ class DiscussionDetailPage extends StatelessWidget {
                     discussion.courseId,
                   );
 
-                  // İşlem başarılı, dialog açıksa kapat
                   if (ctx.mounted) Navigator.pop(ctx);
 
                 } catch (e) {
-                  // Hata varsa göster
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text("Error: $e")),
                   );
