@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+import 'package:surate/providers/theme_provider.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -7,14 +9,11 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back,
-            color: Color(0xFF004990),
             size: 30,
           ),
           onPressed: () {
@@ -66,7 +65,9 @@ class ProfilePage extends StatelessWidget {
                           "Class of 2028",
                           style: TextStyle(color: Colors.black54),
                         ),
-                        const SizedBox(height: 30),
+                        const SizedBox(height: 20),
+                        _buildThemeSwitch(context),
+                        const SizedBox(height: 10),
                         _buildButton("Change Username", () {}),
                         _buildButton("Change Password", () {}),
                         _buildButton("Delete Account", () {}),
@@ -93,6 +94,25 @@ class ProfilePage extends StatelessWidget {
               ],
             );
           }),
+    );
+  }
+
+  Widget _buildThemeSwitch(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text("Dark Mode"),
+          Switch(
+            value: themeProvider.themeMode == ThemeMode.dark,
+            onChanged: (value) {
+              themeProvider.toggleTheme(value);
+            },
+          ),
+        ],
+      ),
     );
   }
 
