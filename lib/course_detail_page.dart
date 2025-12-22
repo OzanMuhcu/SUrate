@@ -152,6 +152,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
           Expanded(
             child: courseId == null || courseId.isEmpty
                 ? const Center(child: Text("Course info is missing."))
+                : authProvider.user == null
+                    ? const Center(child: CircularProgressIndicator())
                 : StreamBuilder<List<Comment>>(
               stream: dataProvider.getCourseCommentsStream(courseId),
               builder: (context, snapshot) {
