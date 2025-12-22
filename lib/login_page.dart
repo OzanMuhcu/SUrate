@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-
+import 'package:provider/provider.dart';
+import 'package:surate/providers/auth_provider.dart';
 import 'signup_page.dart';
-// AuthWrapper'ı import etmeyi unutma! Yolunu kendine göre ayarla.
-import 'wrappers/auth_wrapper.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -31,36 +29,23 @@ class _LoginPageState extends State<LoginPage> {
     if (_loading) return;
     if (!_formKey.currentState!.validate()) return;
 
-    final email = _emailController.text.trim();
-    final password = _passwordController.text;
-
-    debugPrint("LOGIN EMAIL => $email");
-
     setState(() => _loading = true);
 
     try {
-      // 1. Giriş yapmayı dene
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email,
-        password: password,
+      // Doğrudan Firebase yerine Provider kullanıyoruz.
+      // listen: false, çünkü burada sadece bir aksiyon tetikliyoruz.
+      await context.read<AuthProvider>().login(
+        _emailController.text.trim(),
+        _passwordController.text,
       );
 
-      // 2. 🔥 GARANTİ ÇÖZÜM BURASI 🔥
-      // Eğer hata almadıysak giriş başarılıdır.
-      // Ekranda AuthWrapper olsa da olmasa da, biz zorla oraya yönlendiriyoruz.
+      // Başarılı olursa AuthWrapper otomatik olarak sayfayı değiştirecek.
+    } catch (e) {
       if (mounted) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (_) => const AuthWrapper()),
-              (route) => false, // Tüm geçmişi sil, tertemiz sayfa aç
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Login Failed: $e")),
         );
       }
-
-    } on FirebaseAuthException catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message ?? e.code)),
-      );
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -70,91 +55,100 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF004990),
-      body: Center(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              const SizedBox(height: 60),
-
-              const Text(
-                "SuRate",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 36,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-
-              const SizedBox(height: 40),
-
-              Form(
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Form(
                 key: _formKey,
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
+                    const Text(
+                      "SuRate",
+                      style: TextStyle(
+                        fontSize: 40,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    const Text(
+                      "Login",
+                      style: TextStyle(
+                        fontSize: 28,
+                        color: Colors.white70,
+                      ),
+                    ),
+                    const SizedBox(height: 40),
+
+                    // E-Mail Input
                     _input(
                       "Email",
                       _emailController,
-                      validator: (v) {
-                        if (v == null || v.isEmpty) {
-                          return "Email boş olamaz";
+                      validator: (val) {
+                        if (val == null || val.isEmpty) {
+                          return "Please enter email";
                         }
-                        if (!v.contains("@")) {
-                          return "Geçerli email gir";
+                        if (!val.contains("@")) {
+                          return "Enter a valid email";
                         }
                         return null;
                       },
                     ),
 
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
 
+                    // Password Input
                     _input(
                       "Password",
                       _passwordController,
                       obscure: true,
-                      validator: (v) {
-                        if (v == null || v.isEmpty) {
-                          return "Şifre boş olamaz";
+                      validator: (val) {
+                        if (val == null || val.isEmpty) {
+                          return "Please enter password";
                         }
-                        if (v.length < 6) {
-                          return "En az 6 karakter";
+                        if (val.length < 6) {
+                          return "Password must be at least 6 chars";
                         }
                         return null;
                       },
                     ),
+
+                    const SizedBox(height: 30),
+
+                    // Login Button
+                    _loading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : _button("Login", _login),
+
+                    const SizedBox(height: 20),
+
+                    // Sign Up Link
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const SignUpPage()),
+                        );
+                      },
+                      child: const Text(
+                        "Don't have an account? Sign Up",
+                        style: TextStyle(
+                          color: Colors.white,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 40),
                   ],
                 ),
               ),
-
-              const SizedBox(height: 30),
-
-              /// Buton
-              _button(
-                _loading ? "Loading..." : "Sign In",
-                _loading ? () {} : _login,
-              ),
-
-              const SizedBox(height: 20),
-
-              GestureDetector(
-                onTap: () {
-                  // Sign Up sayfasına giderken de AuthWrapper'ı öldürmemek için 'push' kullanabiliriz
-                  // Ama geri dönüşte zaten AuthWrapper'ı çağıracağımız için pushReplacement kalabilir.
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => const SignUpPage()),
-                  );
-                },
-                child: const Text(
-                  "Don't have an account? Sign Up",
-                  style: TextStyle(
-                    color: Colors.white,
-                    decoration: TextDecoration.underline,
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 40),
-            ],
+            ),
           ),
         ),
       ),
@@ -174,7 +168,6 @@ class _LoginPageState extends State<LoginPage> {
         obscureText: obscure,
         autocorrect: false,
         enableSuggestions: false,
-        autofillHints: const [],
         textCapitalization: TextCapitalization.none,
         validator: validator,
         decoration: InputDecoration(

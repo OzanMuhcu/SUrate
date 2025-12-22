@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
-
 import 'providers/auth_provider.dart';
-import 'wrappers/auth_wrapper.dart';
-import 'package:firebase_core/firebase_core.dart';
-
+import 'providers/data_provider.dart';
+import 'wrappers/auth_wrapper.dart'; //
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(); // Firebase başlatma
 
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => AuthProvider(),
+    MultiProvider(
+      providers: [
+        // Auth State Yönetimi (Giriş/Çıkış)
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+
+        // Core App Data Yönetimi (Courses, Discussions)
+        // AuthProvider'a bağımlı ise ProxyProvider kullanılabilir ama burada bağımsız.
+        ChangeNotifierProvider(create: (_) => DataProvider()),
+      ],
       child: const MyApp(),
     ),
   );
@@ -25,17 +30,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'Surate',
       debugShowCheckedModeBanner: false,
-      title: 'SuRate',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF004990),
-        ),
+        primaryColor: const Color(0xFF004990),
         useMaterial3: true,
       ),
-
-      // auth
-      home: AuthWrapper(),
+      // AuthWrapper ile kullanıcı durumuna göre yönlendirme
+      home: const AuthWrapper(),
     );
   }
 }

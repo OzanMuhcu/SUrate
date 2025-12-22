@@ -1,4 +1,5 @@
-import 'firestore_helpers.dart';
+// DİKKAT: 'surate' yerine proje isminiz farklıysa onu yazın.
+import 'package:surate/models/firestore_helpers.dart';
 
 class Comment {
   final String id;
@@ -25,6 +26,7 @@ class Comment {
     return Comment(
       id: data['id'] as String? ?? id,
       createdBy: data['createdBy'] as String? ?? '',
+      // parseCreatedAt fonksiyonu firestore_helpers.dart içinden gelir
       createdAt: parseCreatedAt(data['createdAt']),
       courseId: data['courseId'] as String? ?? '',
       authorName: data['authorName'] as String? ?? '',
