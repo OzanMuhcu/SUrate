@@ -1,33 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../services/auth_service.dart';
 
 class AuthProvider extends ChangeNotifier {
-  final AuthService _authService = AuthService();
-  User? _user;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  User? get user => _user;
-  bool get isLoggedIn => _user != null;
+  User? _user;
+  bool _initialized = false;
 
   AuthProvider() {
-    _authService.authStateChanges.listen((user) {
+    _auth.authStateChanges().listen((user) {
       _user = user;
+      _initialized = true;
       notifyListeners();
     });
   }
 
-
-  Future<void> login(String email, String password) async {
-    await _authService.signIn(email, password);
-  }
-
+  bool get isInitialized => _initialized;
+  bool get isLoggedIn => _user != null;
+  User? get user => _user;
 
   Future<void> register(String email, String password) async {
-    await _authService.signUp(email, password);
+    await _auth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
   }
 
+  Future<void> login(String email, String password) async {
+    await _auth.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+  }
 
   Future<void> logout() async {
-    await _authService.signOut();
+    await _auth.signOut();
   }
 }

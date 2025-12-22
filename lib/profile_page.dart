@@ -52,7 +52,7 @@ class ProfilePage extends StatelessWidget {
 
                   // ✅ DİNAMİK İSİM
                   Text(
-                    user?.displayName ?? "İsim yok",
+                    user?.displayName ?? "No Name",
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -63,7 +63,7 @@ class ProfilePage extends StatelessWidget {
 
                   // ✅ DİNAMİK EMAIL
                   Text(
-                    user?.email ?? "Email yok",
+                    user?.email ?? "No Email",
                     style: const TextStyle(color: Colors.black54),
                   ),
 
@@ -84,7 +84,11 @@ class ProfilePage extends StatelessWidget {
                   /// 🔴 GERÇEK LOGOUT
                   _buildButton("Logout", () async {
                     await FirebaseAuth.instance.signOut();
-                    Navigator.of(context).popUntil((route) => route.isFirst);
+                    // Navigator.popUntil(context, (route) => route.isFirst); // Bu bazen sorun çıkarabilir
+                    // AuthWrapper zaten stream dinlediği için otomatik Login'e dönecek
+                    if (context.mounted) {
+                       Navigator.of(context).pop(); // Profile sayfasından çık
+                    }
                   }),
                 ],
               ),

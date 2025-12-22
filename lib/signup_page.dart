@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
-import 'login_page.dart';
-import 'TermsAndConditionsPage.dart';
 import 'package:surate/providers/auth_provider.dart';
 
 class SignUpPage extends StatefulWidget {
-  const SignUpPage({super.key});
+  final VoidCallback onClickedSignIn;
+  const SignUpPage({super.key, required this.onClickedSignIn});
 
   @override
   State<SignUpPage> createState() => _SignUpPageState();
@@ -16,19 +14,39 @@ class _SignUpPageState extends State<SignUpPage> {
   final _formKey = GlobalKey<FormState>();
 
   final _emailController = TextEditingController();
-  final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  final _gradYearController = TextEditingController();
+
+  bool _loading = false;
 
   @override
   void dispose() {
     _emailController.dispose();
-    _usernameController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
-    _gradYearController.dispose();
     super.dispose();
+  }
+
+  Future<void> _signUp() async {
+    if (_loading) return;
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _loading = true);
+
+    try {
+      await context.read<AuthProvider>().register(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
+      );
+      // AuthWrapper authStateChanges ile Home'a geçecek
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
   }
 
   @override
@@ -39,7 +57,7 @@ class _SignUpPageState extends State<SignUpPage> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              const SizedBox(height: 40),
+              const SizedBox(height: 60),
               const Text(
                 "SuRate",
                 style: TextStyle(
@@ -58,47 +76,35 @@ class _SignUpPageState extends State<SignUpPage> {
                       "Email",
                       _emailController,
                       validator: (v) {
-                        if (v == null || v.isEmpty) return "Email boş olamaz";
-                        if (!v.contains("@")) return "Geçerli email gir";
+                        if (v == null || v.isEmpty) {
+                          return "Email boş olamaz";
+                        }
+                        if (!v.contains("@")) {
+                          return "Geçerli email gir";
+                        }
                         return null;
                       },
-                    ),
-                    const SizedBox(height: 16),
-                    _input(
-                      "Username",
-                      _usernameController,
-                      validator: (v) =>
-                      v == null || v.isEmpty ? "Username boş olamaz" : null,
                     ),
                     const SizedBox(height: 16),
                     _input(
                       "Password",
                       _passwordController,
                       obscure: true,
-                      validator: (v) =>
-                      v == null || v.length < 6
-                          ? "En az 6 karakter"
-                          : null,
+                      validator: (v) {
+                        if (v == null || v.length < 6) {
+                          return "En az 6 karakter";
+                        }
+                        return null;
+                      },
                     ),
                     const SizedBox(height: 16),
                     _input(
                       "Confirm Password",
                       _confirmPasswordController,
                       obscure: true,
-                      validator: (v) =>
-                      v != _passwordController.text
-                          ? "Şifreler eşleşmiyor"
-                          : null,
-                    ),
-                    const SizedBox(height: 16),
-                    _input(
-                      "Graduation Year",
-                      _gradYearController,
-                      keyboard: TextInputType.number,
                       validator: (v) {
-                        final year = int.tryParse(v ?? "");
-                        if (year == null || year < 2024 || year > 2035) {
-                          return "Geçerli mezuniyet yılı";
+                        if (v != _passwordController.text) {
+                          return "Şifreler eşleşmiyor";
                         }
                         return null;
                       },
@@ -109,62 +115,15 @@ class _SignUpPageState extends State<SignUpPage> {
 
               const SizedBox(height: 30),
 
-
               GestureDetector(
-                onTap: () async {
-                  if (!_formKey.currentState!.validate()) return;
-
-                  final auth = context.read<AuthProvider>();
-
-                  try {
-
-                    await auth.register(
-                      _emailController.text.trim(),
-                      _passwordController.text.trim(),
-                    );
-
-                    if (!mounted) return;
-
-                    await auth.logout();
-
-                    if (!mounted) return;
-
-
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const TermsAndConditionsPage(),
-                      ),
-                    );
-                  } catch (e) {
-                    if (!mounted) return;
-                    showDialog(
-                      context: context,
-                      builder: (_) => AlertDialog(
-                        title: const Text("Sign Up Failed"),
-                        content: Text(e.toString()),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text("OK"),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                },
-                child: _button("Sign Up"),
+                onTap: _loading ? null : _signUp,
+                child: _button(_loading ? "Loading..." : "Sign Up"),
               ),
 
               const SizedBox(height: 20),
 
               GestureDetector(
-                onTap: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => const LoginPage()),
-                  );
-                },
+                onTap: widget.onClickedSignIn,
                 child: const Text(
                   "Already have an account? Sign In",
                   style: TextStyle(
@@ -186,7 +145,6 @@ class _SignUpPageState extends State<SignUpPage> {
       String label,
       TextEditingController controller, {
         bool obscure = false,
-        TextInputType? keyboard,
         required String? Function(String?) validator,
       }) {
     return SizedBox(
@@ -194,7 +152,6 @@ class _SignUpPageState extends State<SignUpPage> {
       child: TextFormField(
         controller: controller,
         obscureText: obscure,
-        keyboardType: keyboard,
         validator: validator,
         decoration: InputDecoration(
           filled: true,

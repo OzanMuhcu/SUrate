@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'signup_page.dart';
-
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  final VoidCallback onClickedSignUp;
+  const LoginPage({super.key, required this.onClickedSignUp});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -13,8 +12,8 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
 
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   bool _loading = false;
 
@@ -32,7 +31,7 @@ class _LoginPageState extends State<LoginPage> {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
 
-    debugPrint("LOGIN EMAIL => $email");
+    debugPrint('LOGIN EMAIL => $email');
 
     setState(() => _loading = true);
 
@@ -41,7 +40,7 @@ class _LoginPageState extends State<LoginPage> {
         email: email,
         password: password,
       );
-      // AuthWrapper otomatik yönlendirecek
+      // AuthWrapper otomatik HomePage’e yönlendirir
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -63,7 +62,7 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(height: 60),
 
               const Text(
-                "SuRate",
+                'SuRate',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 36,
@@ -78,14 +77,14 @@ class _LoginPageState extends State<LoginPage> {
                 child: Column(
                   children: [
                     _input(
-                      "Email",
-                      _emailController,
+                      label: 'Email',
+                      controller: _emailController,
                       validator: (v) {
                         if (v == null || v.isEmpty) {
-                          return "Email boş olamaz";
+                          return 'Email boş olamaz';
                         }
-                        if (!v.contains("@")) {
-                          return "Geçerli email gir";
+                        if (!v.contains('@')) {
+                          return 'Geçerli email gir';
                         }
                         return null;
                       },
@@ -94,15 +93,15 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 16),
 
                     _input(
-                      "Password",
-                      _passwordController,
+                      label: 'Password',
+                      controller: _passwordController,
                       obscure: true,
                       validator: (v) {
                         if (v == null || v.isEmpty) {
-                          return "Şifre boş olamaz";
+                          return 'Şifre boş olamaz';
                         }
                         if (v.length < 6) {
-                          return "En az 6 karakter";
+                          return 'En az 6 karakter';
                         }
                         return null;
                       },
@@ -113,21 +112,16 @@ class _LoginPageState extends State<LoginPage> {
 
               const SizedBox(height: 30),
 
-              /// ✅ TEK ve DOĞRU BUTON
+              /// ✅ TEK, NET, SORUNSUZ BUTON
               _button(
-                _loading ? "Loading..." : "Sign In",
-                _loading ? () {} : _login,
+                text: _loading ? 'Loading...' : 'Sign In',
+                onTap: _loading ? null : _login,
               ),
 
               const SizedBox(height: 20),
 
               GestureDetector(
-                onTap: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => const SignUpPage()),
-                  );
-                },
+                onTap: widget.onClickedSignUp,
                 child: const Text(
                   "Don't have an account? Sign Up",
                   style: TextStyle(
@@ -145,12 +139,12 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _input(
-      String label,
-      TextEditingController controller, {
-        bool obscure = false,
-        required String? Function(String?) validator,
-      }) {
+  Widget _input({
+    required String label,
+    required TextEditingController controller,
+    bool obscure = false,
+    required String? Function(String?) validator,
+  }) {
     return SizedBox(
       width: 320,
       child: TextFormField(
@@ -173,7 +167,10 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _button(String text, VoidCallback onTap) {
+  Widget _button({
+    required String text,
+    required VoidCallback? onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
