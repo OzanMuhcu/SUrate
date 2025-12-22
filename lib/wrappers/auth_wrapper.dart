@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-// 🔥 DOĞRU IMPORTLAR (bir üst klasör)
+// Make sure these paths match your file structure
 import '../login_page.dart';
 import '../MainPage.dart';
 
@@ -13,20 +13,22 @@ class AuthWrapper extends StatelessWidget {
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
-        // Firebase auth kontrol ederken
+
+        // Check if the stream is still waiting for data
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }
 
-        // Login olmuşsa
+        // If user is logged in (snapshot has data), go to HomePage
         if (snapshot.hasData) {
-          return HomePage(); // MainPage.dart içindeki class
+          // The class name inside MainPage.dart is HomePage
+          return const HomePage();
         }
 
-        // Login değilse
-        return LoginPage(); // ❌ const YOK
+        // If user is not logged in, go to LoginPage
+        return const LoginPage();
       },
     );
   }

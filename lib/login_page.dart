@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'signup_page.dart';
+// AuthWrapper'ı import etmeyi unutma! Yolunu kendine göre ayarla.
+import 'wrappers/auth_wrapper.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -37,11 +39,23 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => _loading = true);
 
     try {
+      // 1. Giriş yapmayı dene
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-      // AuthWrapper otomatik yönlendirecek
+
+      // 2. 🔥 GARANTİ ÇÖZÜM BURASI 🔥
+      // Eğer hata almadıysak giriş başarılıdır.
+      // Ekranda AuthWrapper olsa da olmasa da, biz zorla oraya yönlendiriyoruz.
+      if (mounted) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const AuthWrapper()),
+              (route) => false, // Tüm geçmişi sil, tertemiz sayfa aç
+        );
+      }
+
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -113,7 +127,7 @@ class _LoginPageState extends State<LoginPage> {
 
               const SizedBox(height: 30),
 
-              /// ✅ TEK ve DOĞRU BUTON
+              /// Buton
               _button(
                 _loading ? "Loading..." : "Sign In",
                 _loading ? () {} : _login,
@@ -123,6 +137,8 @@ class _LoginPageState extends State<LoginPage> {
 
               GestureDetector(
                 onTap: () {
+                  // Sign Up sayfasına giderken de AuthWrapper'ı öldürmemek için 'push' kullanabiliriz
+                  // Ama geri dönüşte zaten AuthWrapper'ı çağıracağımız için pushReplacement kalabilir.
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (_) => const SignUpPage()),

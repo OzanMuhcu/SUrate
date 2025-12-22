@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'welcome_page.dart';
 import 'login_page.dart';
 
+// Renkleri sabit tanımlamışsın, gayet güzel.
 const Color primaryBlue = Color(0xFF007ACC);
 const Color lightBlueAccent = Color(0xFFE3F2FD);
 const Color lightestBlueBorder = Color(0xFF90CAF9);
@@ -50,13 +51,15 @@ class _TermsAndConditionsPageState extends State<TermsAndConditionsPage> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Center(
-                    child: Text(
-                      'This is sample text.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: primaryBlue,
+                    child: SingleChildScrollView( // Metin uzun olursa kaydırmak için
+                      child: Text(
+                        'This is sample text.\n\n(Buraya uzun sözleşme metni gelecek...)',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: primaryBlue,
+                        ),
                       ),
                     ),
                   ),
@@ -80,13 +83,20 @@ class _TermsAndConditionsPageState extends State<TermsAndConditionsPage> {
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
-                  Expanded(
-                    child: Text(
-                      'I have read it and I accept',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: primaryBlue,
-                        fontWeight: FontWeight.w500,
+                  Expanded( // Tıklanabilir alanı genişlettim
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _isAccepted = !_isAccepted;
+                        });
+                      },
+                      child: const Text(
+                        'I have read it and I accept',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: primaryBlue,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ),
@@ -116,12 +126,13 @@ class _TermsAndConditionsPageState extends State<TermsAndConditionsPage> {
                       ),
                       child: TextButton(
                         onPressed: () {
+                          // Geri giderken her şeyi silip Welcome'a dönmesi doğru
                           Navigator.pushAndRemoveUntil(
                             context,
                             MaterialPageRoute(
                               builder: (_) => const WelcomePage(),
                             ),
-                            (route) => false,
+                                (route) => false,
                           );
                         },
                         style: TextButton.styleFrom(
@@ -160,13 +171,16 @@ class _TermsAndConditionsPageState extends State<TermsAndConditionsPage> {
                       child: ElevatedButton(
                         onPressed: _isAccepted
                             ? () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => const LoginPage(),
-                                  ),
-                                );
-                              }
+                          /// 🔥 KRİTİK DEĞİŞİKLİK BURADA 🔥
+                          /// push yerine pushReplacement kullanıyoruz.
+                          /// Böylece Terms sayfası kapanıyor, Login sayfası açılıyor.
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const LoginPage(),
+                            ),
+                          );
+                        }
                             : null,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: primaryBlue,

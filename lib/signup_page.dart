@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+// 🔥 DÜZELTME 1: İsim çakışmasını önlemek için 'hide AuthProvider' ekledik
+import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
+
 import 'login_page.dart';
 import 'TermsAndConditionsPage.dart';
 import 'package:surate/providers/auth_provider.dart';
+
+// Dosya yolun farklıysa burayı düzelt (örn: ../wrappers/auth_wrapper.dart)
+import 'wrappers/auth_wrapper.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -59,7 +65,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       _emailController,
                       validator: (v) {
                         if (v == null || v.isEmpty) return "Email boş olamaz";
-                        if (!v.contains("@")) return "Geçerli email gir";
+                        if (!v.contains("@")) return "Geçerli bir email giriniz";
                         return null;
                       },
                     ),
@@ -68,7 +74,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       "Username",
                       _usernameController,
                       validator: (v) =>
-                      v == null || v.isEmpty ? "Username boş olamaz" : null,
+                      v == null || v.isEmpty ? "Kullanıcı adı boş olamaz" : null,
                     ),
                     const SizedBox(height: 16),
                     _input(
@@ -77,7 +83,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       obscure: true,
                       validator: (v) =>
                       v == null || v.length < 6
-                          ? "En az 6 karakter"
+                          ? "En az 6 karakter olmalı"
                           : null,
                     ),
                     const SizedBox(height: 16),
@@ -98,7 +104,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       validator: (v) {
                         final year = int.tryParse(v ?? "");
                         if (year == null || year < 2024 || year > 2035) {
-                          return "Geçerli mezuniyet yılı";
+                          return "Geçerli bir mezuniyet yılı giriniz";
                         }
                         return null;
                       },
@@ -109,44 +115,45 @@ class _SignUpPageState extends State<SignUpPage> {
 
               const SizedBox(height: 30),
 
-
               GestureDetector(
                 onTap: () async {
                   if (!_formKey.currentState!.validate()) return;
 
-                  final auth = context.read<AuthProvider>();
+                  // 🔥 DÜZELTME 2: En garanti yöntem budur.
+                  final auth = Provider.of<AuthProvider>(context, listen: false);
 
                   try {
-
+                    // 1. Kayıt Ol (Firebase burada otomatik giriş yapar)
                     await auth.register(
                       _emailController.text.trim(),
                       _passwordController.text.trim(),
                     );
 
+                    // 2. 🔥 KRİTİK HAMLE: Otomatik girişi iptal et (Logout yap)
+                    // Böylece AuthWrapper, Home sayfasını açmaya çalışmaz.
+                    await FirebaseAuth.instance.signOut();
+
                     if (!mounted) return;
 
-                    await auth.logout();
-
-                    if (!mounted) return;
-
-
+                    // 3. Terms sayfasına yönlendir (Geri gelmeyi engelle)
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                         builder: (_) => const TermsAndConditionsPage(),
                       ),
                     );
+
                   } catch (e) {
                     if (!mounted) return;
                     showDialog(
                       context: context,
                       builder: (_) => AlertDialog(
-                        title: const Text("Sign Up Failed"),
+                        title: const Text("Kayıt Başarısız"),
                         content: Text(e.toString()),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(context),
-                            child: const Text("OK"),
+                            child: const Text("TAMAM"),
                           ),
                         ],
                       ),
@@ -160,9 +167,12 @@ class _SignUpPageState extends State<SignUpPage> {
 
               GestureDetector(
                 onTap: () {
-                  Navigator.pushReplacement(
+                  // Giriş sayfasına dönmek için en temiz yol: AuthWrapper'a dönmek
+                  // Bu sayede tüm geçmiş temizlenir.
+                  Navigator.pushAndRemoveUntil(
                     context,
-                    MaterialPageRoute(builder: (_) => const LoginPage()),
+                    MaterialPageRoute(builder: (_) => const AuthWrapper()),
+                        (route) => false,
                   );
                 },
                 child: const Text(
