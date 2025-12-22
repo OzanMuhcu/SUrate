@@ -175,8 +175,6 @@ class DataProvider extends ChangeNotifier {
         'dislikedBy': <String>[],
       });
     } catch (e) {
-      _errorMessage = "Error adding course comment: $e";
-      notifyListeners();
       rethrow;
     }
   }

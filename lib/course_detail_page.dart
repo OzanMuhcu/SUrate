@@ -70,13 +70,22 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
               return;
             }
 
-            await dataProvider.addCourseComment(
-              courseId,
-              commentText,
-              user.uid,
-              user.email?.split('@')[0] ?? "Anonymous",
-            );
+            try {
+              await dataProvider.addCourseComment(
+                courseId,
+                commentText,
+                user.uid,
+                user.email?.split('@')[0] ?? "Anonymous",
+              );
+            } catch (error) {
+              if (!mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("Failed to post comment: $error")),
+              );
+              return;
+            }
 
+            if (!mounted) return;
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text("Thanks for your review!")),
             );
