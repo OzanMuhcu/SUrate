@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:surate/models/comment.dart';
+import 'package:surate/providers/auth_provider.dart';
+import 'package:surate/providers/data_provider.dart';
 import 'RatePage.dart';
 
 class CourseDetailPage extends StatefulWidget {
@@ -11,59 +15,15 @@ class CourseDetailPage extends StatefulWidget {
 }
 
 class _CourseDetailPageState extends State<CourseDetailPage> {
-  final List<Map<String, String>> _comments = [
-    {
-      'author': 'Ozan M.',
-      'date': 'Oct 24, 2024',
-      'comment':
-          'The course was really challenging but rewarding. Projects teach a lot.',
-    },
-    {
-      'author': 'Yiğit N.',
-      'date': 'Nov 02, 2024',
-      'comment': 'Great explanations but be ready for the exams.',
-    },
-    {
-      'author': 'Berkay B.',
-      'date': 'Sep 15, 2024',
-      'comment': 'Practical assignments were the best part.',
-    },
-    {
-      'author': 'Student 2023',
-      'date': 'Aug 10, 2024',
-      'comment': 'Lectures could be more organized but okay overall.',
-    },
-  ];
-
-  late final List<int> _likes;
-  late final List<int> _dislikes;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _likes = List<int>.filled(_comments.length, 0);
-    _dislikes = List<int>.filled(_comments.length, 0);
-  }
-
-  void _incrementLike(int index) {
-    setState(() {
-      _likes[index]++;
-    });
-  }
-
-  void _incrementDislike(int index) {
-    setState(() {
-      _dislikes[index]++;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final String courseCode = widget.courseData['code'] ?? "CS 101";
     final double rating = (widget.courseData['rating'] is num)
         ? widget.courseData['rating'].toDouble()
         : 0.0;
+    final String? courseId = widget.courseData['id'] as String?;
+    final dataProvider = context.read<DataProvider>();
+    final authProvider = context.watch<AuthProvider>();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -89,13 +49,33 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
             MaterialPageRoute(builder: (context) => const RateCoursePage()),
           );
 
-          if (result != null && result is Map<String, String>) {
-            setState(() {
-              _comments.insert(0, result);
+          if (result is Map<String, String>) {
+            final commentText = result['comment']?.trim();
+            if (commentText == null || commentText.isEmpty) {
+              return;
+            }
 
-              _likes.insert(0, 0);
-              _dislikes.insert(0, 0);
-            });
+            if (courseId == null || courseId.isEmpty) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Course info is missing.")),
+              );
+              return;
+            }
+
+            final user = authProvider.user;
+            if (user == null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("You must be logged in to comment.")),
+              );
+              return;
+            }
+
+            await dataProvider.addCourseComment(
+              courseId,
+              commentText,
+              user.uid,
+              user.email?.split('@')[0] ?? "Anonymous",
+            );
 
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text("Thanks for your review!")),
@@ -161,20 +141,64 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
           ),
 
           Expanded(
-            child: ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: _comments.length,
-              separatorBuilder: (context, index) => const Divider(height: 30),
-              itemBuilder: (context, index) {
-                final c = _comments[index];
-                return _CommentCard(
-                  author: c['author'] ?? '',
-                  date: c['date'] ?? '',
-                  comment: c['comment'] ?? '',
-                  likeCount: _likes[index],
-                  dislikeCount: _dislikes[index],
-                  onLike: () => _incrementLike(index),
-                  onDislike: () => _incrementDislike(index),
+            child: courseId == null || courseId.isEmpty
+                ? const Center(child: Text("Course info is missing."))
+                : StreamBuilder<List<Comment>>(
+              stream: dataProvider.getCourseCommentsStream(courseId),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (snapshot.hasError) {
+                  return Center(child: Text("Error: ${snapshot.error}"));
+                }
+
+                final comments = snapshot.data ?? [];
+                if (comments.isEmpty) {
+                  return const Center(
+                    child: Text("No reviews yet. Be the first to review!"),
+                  );
+                }
+
+                return ListView.separated(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: comments.length,
+                  separatorBuilder: (context, index) => const Divider(height: 30),
+                  itemBuilder: (context, index) {
+                    final comment = comments[index];
+                    final userId = authProvider.user?.uid;
+                    final isLiked = userId != null &&
+                        comment.likedBy.contains(userId);
+                    final isDisliked = userId != null &&
+                        comment.dislikedBy.contains(userId);
+
+                    return _CommentCard(
+                      author: comment.authorName,
+                      date: _formatDate(comment.createdAt),
+                      comment: comment.text,
+                      likeCount: comment.likeCount,
+                      dislikeCount: comment.dislikeCount,
+                      isLiked: isLiked,
+                      isDisliked: isDisliked,
+                      onLike: isLiked
+                          ? null
+                          : () => _handleReaction(
+                        context,
+                        courseId,
+                        comment.id,
+                        true,
+                      ),
+                      onDislike: isDisliked
+                          ? null
+                          : () => _handleReaction(
+                        context,
+                        courseId,
+                        comment.id,
+                        false,
+                      ),
+                    );
+                  },
                 );
               },
             ),
@@ -182,6 +206,40 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
         ],
       ),
     );
+  }
+
+  void _handleReaction(
+    BuildContext context,
+    String courseId,
+    String commentId,
+    bool isLike,
+  ) {
+    final user = context.read<AuthProvider>().user;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("You must be logged in to react.")),
+      );
+      return;
+    }
+
+    context.read<DataProvider>().reactToCourseComment(
+      courseId: courseId,
+      commentId: commentId,
+      userId: user.uid,
+      isLike: isLike,
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    if (date.millisecondsSinceEpoch == 0) {
+      return "";
+    }
+    final day = date.day.toString().padLeft(2, '0');
+    final month = date.month.toString().padLeft(2, '0');
+    final year = date.year.toString();
+    final hour = date.hour.toString().padLeft(2, '0');
+    final minute = date.minute.toString().padLeft(2, '0');
+    return "$day/$month/$year $hour:$minute";
   }
 }
 
@@ -191,8 +249,10 @@ class _CommentCard extends StatelessWidget {
   final String comment;
   final int likeCount;
   final int dislikeCount;
-  final VoidCallback onLike;
-  final VoidCallback onDislike;
+  final bool isLiked;
+  final bool isDisliked;
+  final VoidCallback? onLike;
+  final VoidCallback? onDislike;
 
   const _CommentCard({
     required this.author,
@@ -200,6 +260,8 @@ class _CommentCard extends StatelessWidget {
     required this.comment,
     required this.likeCount,
     required this.dislikeCount,
+    required this.isLiked,
+    required this.isDisliked,
     required this.onLike,
     required this.onDislike,
   });
@@ -260,10 +322,12 @@ class _CommentCard extends StatelessWidget {
                       ),
                       child: Row(
                         children: [
-                          const Icon(
-                            Icons.thumb_up_alt_outlined,
+                          Icon(
+                            isLiked
+                                ? Icons.thumb_up_alt
+                                : Icons.thumb_up_alt_outlined,
                             size: 18,
-                            color: Colors.grey,
+                            color: isLiked ? const Color(0xFF0D47A1) : Colors.grey,
                           ),
                           const SizedBox(width: 4),
                           Text(
@@ -288,10 +352,12 @@ class _CommentCard extends StatelessWidget {
                       ),
                       child: Row(
                         children: [
-                          const Icon(
-                            Icons.thumb_down_alt_outlined,
+                          Icon(
+                            isDisliked
+                                ? Icons.thumb_down_alt
+                                : Icons.thumb_down_alt_outlined,
                             size: 18,
-                            color: Colors.grey,
+                            color: isDisliked ? Colors.redAccent : Colors.grey,
                           ),
                           const SizedBox(width: 4),
                           Text(

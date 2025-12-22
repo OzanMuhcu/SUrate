@@ -39,6 +39,7 @@ class Course {
 
   Map<String, dynamic> toMap() {
     return {
+      'id': id,
       'createdBy': createdBy,
       'createdAt': createdAt,
       'code': code,

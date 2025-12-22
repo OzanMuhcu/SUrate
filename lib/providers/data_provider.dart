@@ -115,6 +115,21 @@ class DataProvider extends ChangeNotifier {
     });
   }
 
+  Stream<List<Comment>> getCourseCommentsStream(String courseId) {
+    return _firestore
+        .collection('courses')
+        .doc(courseId)
+        .collection('comments')
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        return Comment.fromFirestore(data, doc.id);
+      }).toList();
+    });
+  }
+
   // --- YORUM EKLEME ---
   Future<void> addComment(String discussionId, String text, String userId, String authorName, String courseId) async {
     try {
@@ -131,6 +146,8 @@ class DataProvider extends ChangeNotifier {
         'createdAt': FieldValue.serverTimestamp(), // Tarih otomatik atanır
         'likeCount': 0,
         'dislikeCount': 0,
+        'likedBy': <String>[],
+        'dislikedBy': <String>[],
       });
       // notifyListeners() GEREKMEZ çünkü Stream kullanıyoruz,
       // Firestore değişince UI otomatik güncellenecek.
@@ -138,6 +155,107 @@ class DataProvider extends ChangeNotifier {
       print("Error adding comment: $e");
       rethrow;
     }
+  }
+
+  Future<void> addCourseComment(String courseId, String text, String userId, String authorName) async {
+    try {
+      await _firestore
+          .collection('courses')
+          .doc(courseId)
+          .collection('comments')
+          .add({
+        'text': text,
+        'createdBy': userId,
+        'authorName': authorName,
+        'courseId': courseId,
+        'createdAt': FieldValue.serverTimestamp(),
+        'likeCount': 0,
+        'dislikeCount': 0,
+        'likedBy': <String>[],
+        'dislikedBy': <String>[],
+      });
+    } catch (e) {
+      _errorMessage = "Error adding course comment: $e";
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  Future<void> reactToCourseComment({
+    required String courseId,
+    required String commentId,
+    required String userId,
+    required bool isLike,
+  }) async {
+    final commentRef = _firestore
+        .collection('courses')
+        .doc(courseId)
+        .collection('comments')
+        .doc(commentId);
+
+    await _updateCommentReaction(
+      commentRef: commentRef,
+      userId: userId,
+      isLike: isLike,
+    );
+  }
+
+  Future<void> _updateCommentReaction({
+    required DocumentReference<Map<String, dynamic>> commentRef,
+    required String userId,
+    required bool isLike,
+  }) async {
+    await _firestore.runTransaction((transaction) async {
+      final snapshot = await transaction.get(commentRef);
+      if (!snapshot.exists) {
+        return;
+      }
+
+      final data = snapshot.data() ?? {};
+      final likedBy = _stringListFromField(data['likedBy']);
+      final dislikedBy = _stringListFromField(data['dislikedBy']);
+      final currentLikeCount = (data['likeCount'] as num?)?.toInt() ?? 0;
+      final currentDislikeCount = (data['dislikeCount'] as num?)?.toInt() ?? 0;
+
+      final likedSet = likedBy.toSet();
+      final dislikedSet = dislikedBy.toSet();
+      var likeCount = currentLikeCount;
+      var dislikeCount = currentDislikeCount;
+
+      if (isLike) {
+        if (likedSet.contains(userId)) {
+          return;
+        }
+        likedSet.add(userId);
+        likeCount = currentLikeCount + 1;
+        if (dislikedSet.remove(userId)) {
+          dislikeCount = currentDislikeCount > 0 ? currentDislikeCount - 1 : 0;
+        }
+      } else {
+        if (dislikedSet.contains(userId)) {
+          return;
+        }
+        dislikedSet.add(userId);
+        dislikeCount = currentDislikeCount + 1;
+        if (likedSet.remove(userId)) {
+          likeCount = currentLikeCount > 0 ? currentLikeCount - 1 : 0;
+        }
+      }
+
+      transaction.update(commentRef, {
+        'likedBy': likedSet.toList(),
+        'dislikedBy': dislikedSet.toList(),
+        'likeCount': likeCount,
+        'dislikeCount': dislikeCount,
+      });
+    });
+  }
+
+  List<String> _stringListFromField(Object? value) {
+    if (value is Iterable) {
+      return value.map((entry) => entry.toString()).toList();
+    }
+    return [];
   }
 
   @override

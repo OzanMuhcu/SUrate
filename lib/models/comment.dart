@@ -9,6 +9,8 @@ class Comment {
   final String text;
   final int likeCount;
   final int dislikeCount;
+  final List<String> likedBy;
+  final List<String> dislikedBy;
 
   const Comment({
     required this.id,
@@ -19,6 +21,8 @@ class Comment {
     required this.text,
     required this.likeCount,
     required this.dislikeCount,
+    required this.likedBy,
+    required this.dislikedBy,
   });
 
   factory Comment.fromFirestore(Map<String, dynamic> data, String id) {
@@ -31,6 +35,8 @@ class Comment {
       text: data['text'] as String? ?? '',
       likeCount: (data['likeCount'] as num?)?.toInt() ?? 0,
       dislikeCount: (data['dislikeCount'] as num?)?.toInt() ?? 0,
+      likedBy: _parseStringList(data['likedBy']),
+      dislikedBy: _parseStringList(data['dislikedBy']),
     );
   }
 
@@ -44,6 +50,15 @@ class Comment {
       'text': text,
       'likeCount': likeCount,
       'dislikeCount': dislikeCount,
+      'likedBy': likedBy,
+      'dislikedBy': dislikedBy,
     };
+  }
+
+  static List<String> _parseStringList(Object? value) {
+    if (value is Iterable) {
+      return value.map((entry) => entry.toString()).toList();
+    }
+    return [];
   }
 }
