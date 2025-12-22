@@ -1,8 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:provider/provider.dart';
+// ÇAKIŞMAYI ÖNLEMEK İÇİN 'hide AuthProvider' EKLENDİ 👇
+import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
+import 'providers/data_provider.dart';
+import 'providers/auth_provider.dart';
 
 class RateCoursePage extends StatefulWidget {
-  const RateCoursePage({super.key});
+  final String courseId;
+  final String courseCode;
+
+  const RateCoursePage({
+    super.key,
+    required this.courseId,
+    required this.courseCode
+  });
 
   @override
   State<RateCoursePage> createState() => _RateCoursePageState();
@@ -14,6 +26,8 @@ class _RateCoursePageState extends State<RateCoursePage> {
   double finalDifficulty = 3.0;
   double projectDifficulty = 3.0;
   bool hasProject = false;
+
+  bool _isSubmitting = false;
   final TextEditingController commentController = TextEditingController();
 
   @override
@@ -23,161 +37,125 @@ class _RateCoursePageState extends State<RateCoursePage> {
         backgroundColor: const Color(0xFF004990),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context), // Geri dön (İptal)
+          onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          "Rate Course",
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 24,
-          ),
+        title: Text(
+          "Rate ${widget.courseCode}",
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Text(
-                  "How difficult was the course?",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                _buildRatingBar(
-                  (rating) => setState(() => courseDifficulty = rating),
-                ),
+      body: _isSubmitting
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              const Text("How difficult was the course?", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              _buildRatingBar((r) => setState(() => courseDifficulty = r)),
 
-                const SizedBox(height: 16),
-                const Text(
-                  "How difficult was the midterm?",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                _buildRatingBar(
-                  (rating) => setState(() => midtermDifficulty = rating),
-                ),
+              const SizedBox(height: 16),
+              const Text("How difficult was the midterm?", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              _buildRatingBar((r) => setState(() => midtermDifficulty = r)),
 
-                const SizedBox(height: 16),
-                const Text(
-                  "How difficult was the final?",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                _buildRatingBar(
-                  (rating) => setState(() => finalDifficulty = rating),
-                ),
+              const SizedBox(height: 16),
+              const Text("How difficult was the final?", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              _buildRatingBar((r) => setState(() => finalDifficulty = r)),
 
-                const SizedBox(height: 16),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      "Is there a project?",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Switch(
-                      value: hasProject,
-                      activeColor: const Color(0xFF004990),
-                      onChanged: (value) {
-                        setState(() {
-                          hasProject = value;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-
-                if (hasProject) ...[
-                  const SizedBox(height: 8),
-                  const Text(
-                    "How difficult was the project?",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  _buildRatingBar(
-                    (rating) => setState(() => projectDifficulty = rating),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("Is there a project?", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  Switch(
+                    value: hasProject,
+                    activeColor: const Color(0xFF004990),
+                    onChanged: (v) => setState(() => hasProject = v),
                   ),
                 ],
+              ),
 
-                const SizedBox(height: 24),
-
-                TextField(
-                  controller: commentController,
-                  maxLines: 4,
-                  textAlign: TextAlign.start,
-                  decoration: InputDecoration(
-                    hintText: "Write your opinion here...",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                        color: Color(0xFF004990),
-                        width: 2,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      if (commentController.text.isNotEmpty) {
-                        Navigator.pop(context, {
-                          'author': 'You', // Şimdilik sabit isim
-                          'date': 'Just Now', // Şimdilik sabit tarih
-                          'comment': commentController.text,
-                        });
-                      } else {
-                        Navigator.pop(context);
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF004990),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                    child: const Text(
-                      "Submit",
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 30),
+              if (hasProject) ...[
+                const SizedBox(height: 8),
+                const Text("How difficult was the project?", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                _buildRatingBar((r) => setState(() => projectDifficulty = r)),
               ],
-            ),
+
+              const SizedBox(height: 24),
+              TextField(
+                controller: commentController,
+                maxLines: 4,
+                decoration: InputDecoration(
+                  hintText: "Write your opinion here...",
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: _submitReview,
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF004990)),
+                  child: const Text("Submit", style: TextStyle(color: Colors.white, fontSize: 18)),
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
+  void _submitReview() async {
+    final String comment = commentController.text.trim();
+    if (comment.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Please write a comment")));
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+
+    try {
+      double sum = courseDifficulty + midtermDifficulty + finalDifficulty;
+      int divisor = 3;
+      if (hasProject) {
+        sum += projectDifficulty;
+        divisor = 4;
+      }
+      final double userRating = sum / divisor;
+
+      final dataProvider = Provider.of<DataProvider>(context, listen: false);
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final user = authProvider.user;
+
+      if (user == null) throw Exception("User not logged in");
+
+      await dataProvider.submitCourseReview(
+        courseId: widget.courseId,
+        userId: user.uid,
+        userName: user.displayName ?? "Anonymous",
+        commentText: comment,
+        userRating: userRating,
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Review submitted!")));
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e")));
+        setState(() => _isSubmitting = false);
+      }
+    }
+  }
+
   Widget _buildRatingBar(ValueChanged<double> onUpdate) {
     return RatingBar.builder(
-      initialRating: 3,
-      minRating: 1,
-      direction: Axis.horizontal,
-      allowHalfRating: true,
-      itemCount: 5,
-      itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
-      itemBuilder: (context, _) => const Icon(Icons.star, color: Colors.amber),
+      initialRating: 3, minRating: 1, direction: Axis.horizontal, allowHalfRating: true,
+      itemCount: 5, itemBuilder: (context, _) => const Icon(Icons.star, color: Colors.amber),
       onRatingUpdate: onUpdate,
     );
   }

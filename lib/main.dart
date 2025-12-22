@@ -2,7 +2,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:surate/providers/theme_provider.dart';
-
 import 'providers/auth_provider.dart';
 import 'providers/data_provider.dart';
 import 'wrappers/auth_wrapper.dart';
@@ -14,7 +13,10 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
+        // 1. AUTH PROVIDER
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+
+        // 2. THEME PROVIDER (Auth'a bağlı)
         ChangeNotifierProxyProvider<AuthProvider, ThemeProvider>(
           create: (context) => ThemeProvider(),
           update: (context, auth, themeProvider) {
@@ -22,10 +24,13 @@ void main() async {
             return themeProvider;
           },
         ),
+
+        // 3. DATA PROVIDER (ARTIK AUTH'A BAĞLI - ÇÖZÜM BURADA ✅)
         ChangeNotifierProxyProvider<AuthProvider, DataProvider>(
           create: (_) => DataProvider(),
-          update: (_, auth, dataProvider) {
-            dataProvider!.updateUser(auth);
+          update: (context, auth, dataProvider) {
+            // Kullanıcı değişince DataProvider'a haber ver!
+            dataProvider!.updateAuth(auth.user);
             return dataProvider;
           },
         ),

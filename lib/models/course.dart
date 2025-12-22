@@ -1,4 +1,4 @@
-import 'firestore_helpers.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Course {
   final String id;
@@ -9,6 +9,7 @@ class Course {
   final String faculty;
   final String major; // CS, EE, ME, BIO...
   final double rating;
+  final int ratingCount; // ✅ EKLENDİ: Ortalama hesabı için şart!
 
   const Course({
     required this.id,
@@ -19,21 +20,21 @@ class Course {
     required this.faculty,
     required this.major,
     required this.rating,
+    required this.ratingCount, // ✅ EKLENDİ
   });
 
-  factory Course.fromFirestore(
-      Map<String, dynamic> data,
-      String id,
-      ) {
+  factory Course.fromFirestore(Map<String, dynamic> data, String id) {
     return Course(
       id: id,
       createdBy: data['createdBy'] as String? ?? '',
-      createdAt: parseCreatedAt(data['createdAt']),
+      createdAt: _parseCreatedAt(data['createdAt']),
       code: data['code'] as String? ?? '',
       name: data['name'] as String? ?? '',
       faculty: data['faculty'] as String? ?? '',
       major: data['major'] as String? ?? '',
+      // Sayısal değerleri güvenli çeviriyoruz (null gelirse patlamasın diye)
       rating: (data['rating'] as num?)?.toDouble() ?? 0.0,
+      ratingCount: (data['ratingCount'] as num?)?.toInt() ?? 0, // ✅ EKLENDİ
     );
   }
 
@@ -47,6 +48,17 @@ class Course {
       'faculty': faculty,
       'major': major,
       'rating': rating,
+      'ratingCount': ratingCount, // ✅ EKLENDİ
     };
+  }
+
+  // Tarih formatını güvenli çeviren yardımcı metod
+  static DateTime _parseCreatedAt(dynamic value) {
+    if (value is Timestamp) {
+      return value.toDate();
+    } else if (value is String) {
+      return DateTime.tryParse(value) ?? DateTime.now();
+    }
+    return DateTime.now();
   }
 }

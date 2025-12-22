@@ -1,64 +1,51 @@
-import 'firestore_helpers.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Comment {
   final String id;
-  final String createdBy;
-  final DateTime createdAt;
-  final String courseId;
-  final String authorName;
   final String text;
+  final String createdBy;
+  final String authorName;
+  final String courseId;
+  final DateTime createdAt;
   final int likeCount;
   final int dislikeCount;
   final List<String> likedBy;
   final List<String> dislikedBy;
+  final double rating; // ✅ EKLENDİ
 
-  const Comment({
+  Comment({
     required this.id,
-    required this.createdBy,
-    required this.createdAt,
-    required this.courseId,
-    required this.authorName,
     required this.text,
+    required this.createdBy,
+    required this.authorName,
+    required this.courseId,
+    required this.createdAt,
     required this.likeCount,
     required this.dislikeCount,
     required this.likedBy,
     required this.dislikedBy,
+    this.rating = 0.0, // ✅ Varsayılan değer
   });
 
   factory Comment.fromFirestore(Map<String, dynamic> data, String id) {
     return Comment(
-      id: data['id'] as String? ?? id,
-      createdBy: data['createdBy'] as String? ?? '',
-      createdAt: parseCreatedAt(data['createdAt']),
-      courseId: data['courseId'] as String? ?? '',
-      authorName: data['authorName'] as String? ?? '',
+      id: id,
       text: data['text'] as String? ?? '',
+      createdBy: data['createdBy'] as String? ?? '',
+      authorName: data['authorName'] as String? ?? 'Anonymous',
+      courseId: data['courseId'] as String? ?? '',
+      createdAt: _parseCreatedAt(data['createdAt']),
       likeCount: (data['likeCount'] as num?)?.toInt() ?? 0,
       dislikeCount: (data['dislikeCount'] as num?)?.toInt() ?? 0,
-      likedBy: _parseStringList(data['likedBy']),
-      dislikedBy: _parseStringList(data['dislikedBy']),
+      likedBy: List<String>.from(data['likedBy'] ?? []),
+      dislikedBy: List<String>.from(data['dislikedBy'] ?? []),
+      rating: (data['rating'] as num?)?.toDouble() ?? 0.0, // ✅ EKLENDİ
     );
   }
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'createdBy': createdBy,
-      'createdAt': createdAt,
-      'courseId': courseId,
-      'authorName': authorName,
-      'text': text,
-      'likeCount': likeCount,
-      'dislikeCount': dislikeCount,
-      'likedBy': likedBy,
-      'dislikedBy': dislikedBy,
-    };
-  }
-
-  static List<String> _parseStringList(Object? value) {
-    if (value is Iterable) {
-      return value.map((entry) => entry.toString()).toList();
-    }
-    return [];
+  static DateTime _parseCreatedAt(dynamic value) {
+    if (value is Timestamp) return value.toDate();
+    if (value is String) return DateTime.tryParse(value) ?? DateTime.now();
+    return DateTime.now();
   }
 }
