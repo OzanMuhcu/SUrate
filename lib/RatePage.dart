@@ -139,6 +139,11 @@ class _RateCoursePageState extends State<RateCoursePage> {
                           'author': 'You', // Şimdilik sabit isim
                           'date': 'Just Now', // Şimdilik sabit tarih
                           'comment': commentController.text,
+                          'courseDifficulty': courseDifficulty,
+                          'midtermDifficulty': midtermDifficulty,
+                          'finalDifficulty': finalDifficulty,
+                          'projectDifficulty': hasProject ? projectDifficulty : null,
+                          'hasProject': hasProject,
                         });
                       } else {
                         Navigator.pop(context);

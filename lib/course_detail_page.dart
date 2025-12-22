@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:surate/models/comment.dart';
 import 'package:surate/providers/auth_provider.dart';
@@ -49,7 +51,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
             MaterialPageRoute(builder: (context) => const RateCoursePage()),
           );
 
-          if (result is Map<String, String>) {
+          if (result is Map<String, dynamic>) {
             final commentText = result['comment']?.trim();
             if (commentText == null || commentText.isEmpty) {
               return;
@@ -71,6 +73,24 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
             }
 
             try {
+              // Firebase'e rating kaydetme
+              await FirebaseFirestore.instance
+                  .collection('courses')
+                  .doc(courseId)
+                  .collection('ratings')
+                  .add({
+                'userId': user.uid,
+                'userName': user.email?.split('@')[0] ?? "Anonymous",
+                'comment': commentText,
+                'courseDifficulty': result['courseDifficulty'],
+                'midtermDifficulty': result['midtermDifficulty'],
+                'finalDifficulty': result['finalDifficulty'],
+                'projectDifficulty': result['projectDifficulty'],
+                'hasProject': result['hasProject'],
+                'createdAt': FieldValue.serverTimestamp(),
+              });
+
+              // Yorumu ayrıca provider üzerinden ekle (Mevcut akışı bozmamak için)
               await dataProvider.addCourseComment(
                 courseId,
                 commentText,
