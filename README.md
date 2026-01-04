@@ -79,5 +79,6 @@ cd SUrate
 * flutter run
 
 ### 5. Running Tests
-- The project includes unit and widget tests to verify core functionalities such as authentication validation, rating logic, and UI behavior. To run all tests:
+ The project includes unit and widget tests to verify core functionalities such as authentication validation, rating logic, and UI behavior. 
+ To run all tests:
 * flutter test
