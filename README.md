@@ -20,6 +20,18 @@ At Sabancı University, students traditionally rely on scattered sources like Wh
 * **Search & Filter:** Advanced filtering by faculty and course level.
 
 ---
+## Known Limitations
+
+- The full Sabancı University course database is not included.
+- To demonstrate functionality, only 1–2 sample courses from each department were added.
+- Course data was intentionally limited due to time and scope constraints.
+
+## Known Bugs
+
+- No known bugs were identified during development.
+- All implemented features worked as expected in the conducted unit and widget tests.
+- 
+---
 
 ## 🛠 Tech Stack
 
