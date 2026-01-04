@@ -1,8 +1,8 @@
-# SUrate 🎓
+# SUrate 
 
 **SUrate** is a mobile application developed specifically for Sabancı University students to facilitate informed course selections through peer reviews, ratings, and collaborative discussions.
 
-## 🚀 Motivation
+## Motivation
 
 At Sabancı University, students traditionally rely on scattered sources like WhatsApp groups or word-of-mouth to gather information about courses. Important details regarding exam difficulty, instructor teaching styles, and workload often get lost in chat histories or remain fragmented across different channels.
 
@@ -10,7 +10,7 @@ At Sabancı University, students traditionally rely on scattered sources like Wh
 
 ---
 
-## 📱 Features
+## Features
 
 * **Secure Authentication:** Integration with Firebase Auth for secure Sign Up/Login.
 * **Course Ratings:** Detailed rating system for course content, grading, and difficulty.
@@ -30,10 +30,9 @@ At Sabancı University, students traditionally rely on scattered sources like Wh
 
 - No known bugs were identified during development.
 - All implemented features worked as expected in the conducted unit and widget tests.
-- 
 ---
 
-## 🛠 Tech Stack
+## Tech Stack
 
 * **Framework:** Flutter (Dart)
 * **Backend:** Firebase (Authentication, Firestore Database)
@@ -42,7 +41,7 @@ At Sabancı University, students traditionally rely on scattered sources like Wh
 
 ---
 
-## 👥 Team Members
+## Team Members
 
 | Name | Student ID | Contribution |
 | :--- | :--- | :--- |
@@ -68,3 +67,13 @@ Clone the repository:
 ```bash
 git clone [https://github.com/YOUR_GITHUB_USERNAME/surate.git](https://github.com/YOUR_GITHUB_USERNAME/surate.git)
 cd surate
+```
+### 3. Install Dependencies
+* flutter pub get
+
+### 4. Run the Application
+* flutter run
+
+### 5. How to run tests?
+-The project includes unit and widget tests to verify core functionalities such as authentication validation, rating logic, and UI behavior. To run all tests:
+*flutter test
