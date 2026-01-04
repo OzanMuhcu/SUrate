@@ -1,31 +1,58 @@
-# SUrate
+# SUrate 🎓
 
-A mobile application for Sabancı University students to rate and review courses and instructors.
+**SUrate** is a mobile application developed specifically for Sabancı University students to facilitate informed course selections through peer reviews, ratings, and collaborative discussions.
 
-## The Problem
+## 🚀 Motivation
 
-At Sabancı University, students often rely on friends or scattered WhatsApp groups to get information about course content, difficulty level, assignments, exams, and instructors. This information is often fragmented, inconsistent, and not easily accessible for every course or instructor, making it difficult for students to make informed decisions about their course selections.
+At Sabancı University, students traditionally rely on scattered sources like WhatsApp groups or word-of-mouth to gather information about courses. Important details regarding exam difficulty, instructor teaching styles, and workload often get lost in chat histories or remain fragmented across different channels.
 
-## Our Solution
+**SUrate** was built to solve this "information chaos." Our goal is to provide a **centralized, reliable platform** where students can access organized data, share their experiences, and make better academic decisions without having to dig through archived chat logs.
 
-**SUrate** provides a centralized, dedicated platform for Sabancı students to solve this problem. It is a mobile application where students can register using their official university email accounts. Once registered, students who have taken or are currently taking a course can rate and leave detailed comments about both the course and its instructor.
+---
 
-This creates a reliable, peer-reviewed database of course information, accessible to the entire student community.
+## 📱 Features
 
-## Features
+* **Secure Authentication:** Integration with Firebase Auth for secure Sign Up/Login.
+* **Course Ratings:** Detailed rating system for course content, grading, and difficulty.
+* **Instructor Feedback:** Specific ratings for instructor effectiveness.
+* **Dynamic UI:** Dark/Light mode support and intuitive drawer navigation.
+* **Discussion Boards:** Thread-based comments for Q&A on specific courses.
+* **Search & Filter:** Advanced filtering by faculty and course level.
 
--   **Secure Authentication:** Students register and log in using their Sabancı University email accounts.
--   **Course Reviews:** Rate courses based on content, difficulty, workload, and grading.
--   **Instructor Feedback:** Rate instructors on their teaching style, clarity, and helpfulness.
--   **Written Comments:** Leave detailed, anonymous comments to share specific insights and advice.
--   **Centralized Database:** A single, easy-to-search source for all course and instructor information.
+---
+
+## 🛠 Tech Stack
+
+* **Framework:** Flutter (Dart)
+* **Backend:** Firebase (Authentication, Firestore Database)
+* **State Management:** Provider
+* **Testing:** Flutter Test (Unit & Widget Testing)
+
+---
 
 ## 👥 Team Members
 
-| Name                | Student ID |
-| ------------------- | ---------- |
-| Yağmur Geçim        | 32331      |
-| Berkay Bilici       | 32176      |
-| Osman Ozan Muhçu    | 32434      |
-| Sinan Altıntuğ      | 31954      |
-| Yiğit Narcı         | 32419      |
+| Name | Student ID | Contribution |
+| :--- | :--- | :--- |
+| **Yağmur Geçim** | 32331 | Auth, Profile, Testing |
+| **Berkay Bilici** | 32176 | Comments, Discussions, Video |
+| **Osman Ozan Muhçu** | 32434 | Filters, Terms & Conditions |
+| **Sinan Altıntuğ** | 31954 | Ratings, Main UI, Integration |
+| **Yiğit Narcı** | 32419 | Navigation, Data Entry |
+
+---
+
+## ⚙️ Setup & Installation
+
+Follow these steps to run the project locally:
+
+### 1. Prerequisites
+* Flutter SDK installed (Stable channel recommended).
+* A physical device or an emulator (Android Studio/Xcode).
+* Git installed.
+
+### 2. Installation
+Clone the repository:
+```bash
+git clone [https://github.com/YOUR_GITHUB_USERNAME/surate.git](https://github.com/YOUR_GITHUB_USERNAME/surate.git)
+cd surate
