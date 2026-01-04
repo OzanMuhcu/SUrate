@@ -28,8 +28,7 @@ At Sabancı University, students traditionally rely on scattered sources like Wh
 
 ## Known Bugs
 
-- No known bugs were identified during development.
-- All implemented features worked as expected in the conducted unit and widget tests.
+- Extensive manual testing and automated widget tests have been performed throughout the development process. As of the final build, no critical bugs have been identified. All core features (Authentication, Rating, Filtering, and Navigation) function as intended.
 ---
 
 ## Tech Stack
