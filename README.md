@@ -65,8 +65,8 @@ Follow these steps to run the project locally:
 ### 2. Installation
 Clone the repository:
 ```bash
-git clone [https://github.com/YOUR_GITHUB_USERNAME/surate.git](https://github.com/YOUR_GITHUB_USERNAME/surate.git)
-cd surate
+git clone https://github.com/OzanMuhcu/SUrate.git
+cd SUrate
 ```
 ### 3. Install Dependencies
 * flutter pub get
