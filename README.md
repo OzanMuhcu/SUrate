@@ -76,4 +76,4 @@ cd surate
 
 ### 5. How to run tests?
 -The project includes unit and widget tests to verify core functionalities such as authentication validation, rating logic, and UI behavior. To run all tests:
-*flutter test
+* flutter test
