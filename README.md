@@ -71,9 +71,13 @@ cd surate
 ### 3. Install Dependencies
 * flutter pub get
 
+### !! Firebase Configuration !!
+* A Firebase project is required to run the application.
+* Firebase Authentication and Firestore are used as backend services.
+
 ### 4. Run the Application
 * flutter run
 
-### 5. How to run tests?
--The project includes unit and widget tests to verify core functionalities such as authentication validation, rating logic, and UI behavior. To run all tests:
+### 5. Running Tests
+- The project includes unit and widget tests to verify core functionalities such as authentication validation, rating logic, and UI behavior. To run all tests:
 * flutter test
