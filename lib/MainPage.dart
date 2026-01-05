@@ -53,19 +53,20 @@ class _HomePageState extends State<HomePage> {
       return matchesSearch && matchesCategory;
     }).toList();
 
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: theme.scaffoldBackgroundColor,
 
       appBar: AppBar(
-        backgroundColor: const Color(0xFF004990),
-        iconTheme: const IconThemeData(color: Colors.white),
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        iconTheme: theme.appBarTheme.iconTheme,
         centerTitle: true,
-        title: const Text(
+        title: Text(
           "SuRate",
-          style: TextStyle(
-            color: Colors.white,
+          style: theme.textTheme.headlineSmall?.copyWith(
+            color: theme.colorScheme.onPrimary,
             fontWeight: FontWeight.bold,
-            fontSize: 22,
           ),
         ),
         actions: [
@@ -78,10 +79,10 @@ class _HomePageState extends State<HomePage> {
                   MaterialPageRoute(builder: (context) => const ProfilePage()),
                 );
               },
-              child: const CircleAvatar(
+              child: CircleAvatar(
                 radius: 18,
-                backgroundColor: Colors.white,
-                child: Icon(Icons.person, color: Color(0xFF004990)),
+                backgroundColor: theme.colorScheme.onPrimary,
+                child: Icon(Icons.person, color: theme.colorScheme.primary),
               ),
             ),
           ),
@@ -98,7 +99,7 @@ class _HomePageState extends State<HomePage> {
         children: [
           Container(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
-            color: const Color(0xFFF5F5F5),
+            color: theme.scaffoldBackgroundColor,
             child: TextField(
               controller: _searchController,
               onChanged: (value) {
@@ -108,9 +109,9 @@ class _HomePageState extends State<HomePage> {
               },
               decoration: InputDecoration(
                 hintText: "Search for classes...",
-                prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                prefixIcon: Icon(Icons.search, color: theme.hintColor),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: theme.cardColor,
                 contentPadding: const EdgeInsets.symmetric(vertical: 0),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30),
@@ -118,7 +119,7 @@ class _HomePageState extends State<HomePage> {
                 ),
                 suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
-                  icon: const Icon(Icons.clear, color: Colors.grey),
+                  icon: Icon(Icons.clear, color: theme.hintColor),
                   onPressed: () {
                     _searchController.clear();
                     setState(() {
@@ -138,7 +139,10 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   Text(
                     "Filtering by: $_selectedCategory",
-                    style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF004990)),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.primary,
+                    ),
                   ),
                   const SizedBox(width: 10),
                   GestureDetector(
@@ -155,10 +159,10 @@ class _HomePageState extends State<HomePage> {
                 : errorMessage != null
                 ? Center(child: Text("Error: $errorMessage"))
                 : filteredCourses.isEmpty
-                ? const Center(
+                ? Center(
               child: Text(
                 "No courses found.",
-                style: TextStyle(fontSize: 16, color: Colors.grey),
+                style: theme.textTheme.bodyMedium?.copyWith(color: theme.hintColor),
               ),
             )
                 : ListView.builder(
@@ -191,7 +195,7 @@ class _HomePageState extends State<HomePage> {
       ),
 
       bottomNavigationBar: BottomAppBar(
-        color: const Color(0xFF004990),
+        color: theme.primaryColor,
         child: GestureDetector(
           onTap: () {
             Navigator.push(
@@ -205,14 +209,13 @@ class _HomePageState extends State<HomePage> {
             alignment: Alignment.center,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Icon(Icons.message, color: Colors.white, size: 30),
-                SizedBox(width: 10),
+              children: [
+                Icon(Icons.message, color: theme.colorScheme.onPrimary, size: 30),
+                const SizedBox(width: 10),
                 Text(
                   "Discussion",
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.white,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    color: theme.colorScheme.onPrimary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -232,6 +235,11 @@ class _HomePageState extends State<HomePage> {
         required double rating,
         required VoidCallback onTap,
       }) {
+    final theme = Theme.of(context);
+    final ratingColor = rating >= 4.0
+        ? Colors.green
+        : (rating >= 2.5 ? Colors.orange : Colors.red);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 15),
       child: GestureDetector(
@@ -239,7 +247,7 @@ class _HomePageState extends State<HomePage> {
         child: Container(
           padding: const EdgeInsets.all(15),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: theme.cardColor,
             borderRadius: BorderRadius.circular(15),
             boxShadow: const [
               BoxShadow(
@@ -258,19 +266,16 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     Text(
                       "$code - $faculty",
-                      style: const TextStyle(
+                      style: theme.textTheme.bodySmall?.copyWith(
                         fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: Colors.grey,
+                        color: theme.hintColor,
                       ),
                     ),
                     const SizedBox(height: 5),
                     Text(
                       name,
-                      style: const TextStyle(
+                      style: theme.textTheme.bodyLarge?.copyWith(
                         fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: Colors.black87,
                       ),
                     ),
                   ],
@@ -279,11 +284,7 @@ class _HomePageState extends State<HomePage> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: rating >= 4.0
-                      ? Colors.green.withOpacity(0.2)
-                      : (rating >= 2.5
-                      ? Colors.orange.withOpacity(0.2)
-                      : Colors.red.withOpacity(0.2)),
+                  color: ratingColor.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
@@ -291,15 +292,14 @@ class _HomePageState extends State<HomePage> {
                     Icon(
                       Icons.star,
                       size: 16,
-                      color: rating >= 4.0
-                          ? Colors.green
-                          : (rating >= 2.5 ? Colors.orange : Colors.red),
+                      color: ratingColor,
                     ),
                     const SizedBox(width: 5),
                     Text(
                       rating.toStringAsFixed(1),
-                      style: const TextStyle(
+                      style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.bold,
+                        color: ratingColor,
                       ),
                     ),
                   ],

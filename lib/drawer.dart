@@ -38,23 +38,24 @@ class _CustomDrawerState extends State<CustomDrawer> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Drawer(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.canvasColor,
       child: Column(
         children: [
           Container(
             width: double.infinity,
             padding: const EdgeInsets.only(top: 50, bottom: 20),
-            color: const Color(0xFF004990),
+            color: theme.primaryColor,
             child: Column(
-              children: const [
-                Icon(Icons.school, color: Colors.white, size: 50),
-                SizedBox(height: 10),
+              children: [
+                Icon(Icons.school, color: theme.colorScheme.onPrimary, size: 50),
+                const SizedBox(height: 10),
                 Text(
                   "Course Selection",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    color: theme.colorScheme.onPrimary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -73,16 +74,17 @@ class _CustomDrawerState extends State<CustomDrawer> {
   }
 
   Widget _buildFacultyList() {
+    final theme = Theme.of(context);
+
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
-        const Text(
+        Text(
           "Select Faculty",
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 20,
+          style: theme.textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.bold,
-            color: Color(0xFF004990),
+            color: theme.colorScheme.primary,
           ),
         ),
         const SizedBox(height: 30),
@@ -101,17 +103,18 @@ class _CustomDrawerState extends State<CustomDrawer> {
   }
 
   Widget _buildCourseList() {
+    final theme = Theme.of(context);
     final courses = _facultyData[_selectedFaculty] ?? [];
 
     return Column(
       children: [
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-          color: Colors.grey[100],
+          color: theme.dividerColor.withOpacity(0.05),
           child: Row(
             children: [
               IconButton(
-                icon: const Icon(Icons.arrow_back, color: Color(0xFF004990)),
+                icon: Icon(Icons.arrow_back, color: theme.colorScheme.primary),
                 onPressed: () {
                   setState(() {
                     _selectedFaculty = null;
@@ -121,9 +124,8 @@ class _CustomDrawerState extends State<CustomDrawer> {
               Expanded(
                 child: Text(
                   "Back to Faculties",
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey[800],
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: theme.colorScheme.secondary,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -137,10 +139,9 @@ class _CustomDrawerState extends State<CustomDrawer> {
           child: Text(
             _selectedFaculty!,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 18,
+            style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
-              color: Color(0xFF004990),
+              color: theme.colorScheme.primary,
             ),
           ),
         ),
@@ -175,6 +176,8 @@ class _CustomDrawerState extends State<CustomDrawer> {
     required VoidCallback onPressed,
     bool isSmall = false,
   }) {
+    final theme = Theme.of(context);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 15),
       child: SizedBox(
@@ -183,7 +186,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
         child: ElevatedButton(
           onPressed: onPressed,
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF004990),
+            backgroundColor: theme.primaryColor,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(30),
             ),
@@ -193,7 +196,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
             text,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.white,
+              color: theme.colorScheme.onPrimary,
               fontSize: isSmall ? 14 : 16,
               fontWeight: FontWeight.bold,
             ),

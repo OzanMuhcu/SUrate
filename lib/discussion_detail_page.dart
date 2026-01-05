@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:surate/models/discussion.dart';
 import 'package:surate/models/comment.dart';
-import '/providers/data_provider.dart';
-import '/providers/auth_provider.dart';
+import 'providers/data_provider.dart';
+import 'providers/auth_provider.dart';
 
 class DiscussionDetailPage extends StatelessWidget {
   final Discussion discussion;
@@ -13,16 +13,17 @@ class DiscussionDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dataProvider = Provider.of<DataProvider>(context, listen: false);
+    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "Discussion Details",
-          style: TextStyle(color: Colors.white, fontSize: 18),
+          style: TextStyle(color: theme.colorScheme.onPrimary, fontSize: 18),
         ),
-        backgroundColor: const Color(0xFF004990),
+        backgroundColor: theme.primaryColor,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onPrimary),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -30,15 +31,15 @@ class DiscussionDetailPage extends StatelessWidget {
         children: [
           Container(
             padding: const EdgeInsets.all(16.0),
-            color: Colors.grey[100],
+            color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    const CircleAvatar(
-                      backgroundColor: Color(0xFF004990),
-                      child: Icon(Icons.person, color: Colors.white),
+                    CircleAvatar(
+                      backgroundColor: theme.primaryColor,
+                      child: Icon(Icons.person, color: theme.colorScheme.onPrimary),
                     ),
                     const SizedBox(width: 10),
                     Column(
@@ -48,11 +49,15 @@ class DiscussionDetailPage extends StatelessWidget {
                           discussion.creatorName.isNotEmpty
                               ? discussion.creatorName
                               : "Anonymous",
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         Text(
                           discussion.createdAt.toString().substring(0, 16),
-                          style: const TextStyle(fontSize: 12, color: Colors.grey),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.hintColor,
+                          ),
                         ),
                       ],
                     ),
@@ -61,16 +66,15 @@ class DiscussionDetailPage extends StatelessWidget {
                 const SizedBox(height: 15),
                 Text(
                   discussion.title,
-                  style: const TextStyle(
-                    fontSize: 20,
+                  style: theme.textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF004990),
+                    color: theme.colorScheme.primary,
                   ),
                 ),
                 const SizedBox(height: 10),
                 Text(
                   discussion.body,
-                  style: const TextStyle(fontSize: 16),
+                  style: theme.textTheme.bodyLarge,
                 ),
               ],
             ),
@@ -119,22 +123,20 @@ class DiscussionDetailPage extends StatelessWidget {
                               children: [
                                 Text(
                                   comment.authorName,
-                                  style: const TextStyle(
+                                  style: theme.textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 14,
                                   ),
                                 ),
                                 Text(
                                   _formatDate(comment.createdAt),
-                                  style: const TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 12,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.hintColor,
                                   ),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 8),
-                            Text(comment.text),
+                            Text(comment.text, style: theme.textTheme.bodyMedium),
                           ],
                         ),
                       ),
@@ -147,9 +149,9 @@ class DiscussionDetailPage extends StatelessWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFF004990),
+        backgroundColor: theme.primaryColor,
         onPressed: () => _showReplyModal(context),
-        child: const Icon(Icons.reply, color: Colors.white),
+        child: Icon(Icons.reply, color: theme.colorScheme.onPrimary),
       ),
     );
   }
@@ -160,6 +162,7 @@ class DiscussionDetailPage extends StatelessWidget {
 
   void _showReplyModal(BuildContext context) {
     final commentController = TextEditingController();
+    final theme = Theme.of(context);
 
     showDialog(
       context: context,
@@ -185,11 +188,11 @@ class DiscussionDetailPage extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text("Cancel"),
+            child: Text("Cancel", style: TextStyle(color: theme.colorScheme.secondary)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF004990),
+              backgroundColor: theme.primaryColor,
             ),
             onPressed: () async {
               if (commentController.text.trim().isEmpty) return;
@@ -222,7 +225,7 @@ class DiscussionDetailPage extends StatelessWidget {
                 );
               }
             },
-            child: const Text("Post", style: TextStyle(color: Colors.white)),
+            child: Text("Post", style: TextStyle(color: theme.colorScheme.onPrimary)),
           ),
         ],
       ),

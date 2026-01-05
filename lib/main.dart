@@ -48,13 +48,18 @@ class MyApp extends StatelessWidget {
           title: 'SuRate',
           theme: ThemeData(
             brightness: Brightness.light,
-            primarySwatch: Colors.blue,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.blue,
+              brightness: Brightness.light,
+            ),
             useMaterial3: true,
           ),
           darkTheme: ThemeData(
             brightness: Brightness.dark,
-            scaffoldBackgroundColor: Colors.grey[400],
-            primarySwatch: Colors.indigo,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.indigo,
+              brightness: Brightness.dark,
+            ),
             useMaterial3: true,
           ),
           themeMode: themeProvider.themeMode,

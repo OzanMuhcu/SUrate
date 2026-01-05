@@ -12,22 +12,23 @@ class DiscussionsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
-        title: const Text(
+        title: Text(
           "General Discussions",
-          style: TextStyle(
-            fontSize: 20,
-            color: Colors.white,
+          style: theme.textTheme.headlineSmall?.copyWith(
+            color: theme.colorScheme.onPrimary,
             fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: const Color(0xFF004990),
+        backgroundColor: theme.primaryColor,
       ),
       body: Consumer<DataProvider>(
         builder: (context, dataProvider, child) {
@@ -56,10 +57,10 @@ class DiscussionsPage extends StatelessWidget {
                         : "Anonymous",
                     title: discussion.title,
                     color: index % 3 == 0
-                        ? const Color(0xFFFFF3E0)
+                        ? theme.colorScheme.tertiaryContainer
                         : (index % 3 == 1
-                        ? const Color(0xFFE3F2FD)
-                        : const Color(0xFFE8F5E9)),
+                        ? theme.colorScheme.secondaryContainer
+                        : theme.colorScheme.primaryContainer),
                     onTap: () {
                       Navigator.push(
                         context,
@@ -81,8 +82,8 @@ class DiscussionsPage extends StatelessWidget {
         onPressed: () {
           _showAddDiscussionDialog(context);
         },
-        backgroundColor: const Color(0xFF004990),
-        child: const Icon(Icons.add, color: Colors.white),
+        backgroundColor: theme.primaryColor,
+        child: Icon(Icons.add, color: theme.colorScheme.onPrimary),
       ),
     );
   }
@@ -90,6 +91,7 @@ class DiscussionsPage extends StatelessWidget {
   void _showAddDiscussionDialog(BuildContext context) {
     final titleController = TextEditingController();
     final bodyController = TextEditingController();
+    final theme = Theme.of(context);
 
     showDialog(
       context: context,
@@ -113,7 +115,7 @@ class DiscussionsPage extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text("Cancel"),
+            child: Text("Cancel", style: TextStyle(color: theme.colorScheme.secondary)),
           ),
           TextButton(
             onPressed: () {
@@ -140,7 +142,7 @@ class DiscussionsPage extends StatelessWidget {
                 );
               }
             },
-            child: const Text("Add"),
+            child: Text("Add", style: TextStyle(color: theme.colorScheme.primary)),
           )
         ],
       ),
@@ -163,12 +165,14 @@ class _DiscussionBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           "— $creator",
-          style: const TextStyle(color: Colors.black54, fontSize: 13),
+          style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
         ),
         const SizedBox(height: 6),
         InkWell(
@@ -189,18 +193,17 @@ class _DiscussionBlock extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Icon(Icons.forum, color: Color(0xFF004990)),
+                Icon(Icons.forum, color: theme.colorScheme.primary),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     title,
-                    style: const TextStyle(
-                      fontSize: 18,
+                    style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
-                const Icon(Icons.chevron_right, color: Colors.black45),
+                Icon(Icons.chevron_right, color: theme.hintColor),
               ],
             ),
           ),

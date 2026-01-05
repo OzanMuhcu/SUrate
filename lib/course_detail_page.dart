@@ -23,6 +23,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
 
     final dataProvider = context.watch<DataProvider>();
     final authProvider = context.watch<AuthProvider>();
+    final theme = Theme.of(context);
 
 
     Course? liveCourse;
@@ -39,12 +40,12 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
         ((widget.courseData['ratingCount'] is num) ? widget.courseData['ratingCount'].toInt() : 0);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF004990),
-        iconTheme: const IconThemeData(color: Colors.white),
+        backgroundColor: theme.primaryColor,
+        iconTheme: IconThemeData(color: theme.colorScheme.onPrimary),
         centerTitle: true,
-        title: Text(courseCode, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24)),
+        title: Text(courseCode, style: TextStyle(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold, fontSize: 24)),
       ),
 
       floatingActionButton: FloatingActionButton(
@@ -63,24 +64,24 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
             ),
           );
         },
-        backgroundColor: const Color(0xFF004990),
-        child: const Icon(Icons.star, color: Colors.white, size: 28),
+        backgroundColor: theme.primaryColor,
+        child: Icon(Icons.star, color: theme.colorScheme.onPrimary, size: 28),
       ),
 
       body: Column(
         children: [
           Container(
-            width: double.infinity, padding: const EdgeInsets.symmetric(vertical: 20), color: Colors.grey[300],
+            width: double.infinity, padding: const EdgeInsets.symmetric(vertical: 20), color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
             child: Column(
               children: [
-                const Text("Course Difficulty", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                Text("Course Difficulty", style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 10),
                 RatingBarIndicator(
                   rating: currentRating, itemBuilder: (context, index) => const Icon(Icons.star, color: Colors.amber),
                   itemCount: 5, itemSize: 35.0, direction: Axis.horizontal,
                 ),
                 const SizedBox(height: 5),
-                Text("${currentRating.toStringAsFixed(1)} / 5.0  ($ratingCount reviews)", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                Text("${currentRating.toStringAsFixed(1)} / 5.0  ($ratingCount reviews)", style: theme.textTheme.titleMedium),
               ],
             ),
           ),
@@ -146,28 +147,30 @@ class _CommentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        CircleAvatar(radius: 20, backgroundColor: Colors.grey[300], child: Text(author.isNotEmpty ? author[0].toUpperCase() : '?', style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF004990)))),
+        CircleAvatar(radius: 20, backgroundColor: theme.colorScheme.surfaceVariant, child: Text(author.isNotEmpty ? author[0].toUpperCase() : '?', style: TextStyle(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurfaceVariant))),
         const SizedBox(width: 12),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Text(author, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-              Text(date, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+              Text(author, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+              Text(date, style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor)),
             ]),
             if (rating > 0) ...[
               const SizedBox(height: 2),
-              Row(children: [const Icon(Icons.star, size: 14, color: Colors.amber), Text(" ${rating.toStringAsFixed(1)}", style: const TextStyle(fontSize: 12, color: Colors.grey))]),
+              Row(children: [const Icon(Icons.star, size: 14, color: Colors.amber), Text(" ${rating.toStringAsFixed(1)}", style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor))]),
             ],
             const SizedBox(height: 5),
-            Text(comment, style: const TextStyle(fontSize: 14, color: Colors.black87)),
+            Text(comment, style: theme.textTheme.bodyMedium),
             const SizedBox(height: 10),
             Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-              InkWell(onTap: onLike, child: Row(children: [Icon(isLiked ? Icons.thumb_up_alt : Icons.thumb_up_alt_outlined, size: 18, color: isLiked ? const Color(0xFF0D47A1) : Colors.grey), const SizedBox(width: 4), Text("$likeCount")])),
+              InkWell(onTap: onLike, child: Row(children: [Icon(isLiked ? Icons.thumb_up_alt : Icons.thumb_up_alt_outlined, size: 18, color: isLiked ? theme.colorScheme.primary : theme.hintColor), const SizedBox(width: 4), Text("$likeCount")])),
               const SizedBox(width: 15),
-              InkWell(onTap: onDislike, child: Row(children: [Icon(isDisliked ? Icons.thumb_down_alt : Icons.thumb_down_alt_outlined, size: 18, color: isDisliked ? Colors.redAccent : Colors.grey), const SizedBox(width: 4), Text("$dislikeCount")])),
+              InkWell(onTap: onDislike, child: Row(children: [Icon(isDisliked ? Icons.thumb_down_alt : Icons.thumb_down_alt_outlined, size: 18, color: isDisliked ? Colors.redAccent : theme.hintColor), const SizedBox(width: 4), Text("$dislikeCount")])),
             ]),
           ]),
         ),
