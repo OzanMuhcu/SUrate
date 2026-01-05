@@ -13,7 +13,7 @@ At Sabancı University, students traditionally rely on scattered sources like Wh
 ## Features
 
 * **Secure Authentication:** Integration with Firebase Auth for secure Sign Up/Login.
-* **Course Ratings:** Detailed rating system for course content, grading, and difficulty.
+* **Course Ratings:** Detailed rating system for course content, grading, and difficulty. Course's overall rating represents it's difficulty (higher rate = more difficulty)
 * **Instructor Feedback:** Specific ratings for instructor effectiveness.
 * **Dynamic UI:** Dark/Light mode support and intuitive drawer navigation.
 * **Discussion Boards:** Thread-based comments for Q&A on specific courses.
@@ -25,6 +25,7 @@ At Sabancı University, students traditionally rely on scattered sources like Wh
 - The full Sabancı University course database is not included.
 - To demonstrate functionality, only 1–2 sample courses from each department were added.
 - Course data was intentionally limited due to time and scope constraints.
+- we were expected to implement 2 pages for each member. For better UI design, we added some buttons to profile page without impelemting their functionality. It is a future work.
 
 ## Known Bugs
 
@@ -68,16 +69,22 @@ git clone https://github.com/OzanMuhcu/SUrate.git
 cd SUrate
 ```
 ### 3. Install Dependencies
-* flutter pub get
+```bash
+flutter pub get
+```
 
 ### !! Firebase Configuration !!
 * A Firebase project is required to run the application.
 * Firebase Authentication and Firestore are used as backend services.
 
 ### 4. Run the Application
-* flutter run
+```bash
+flutter run
+```
 
 ### 5. Running Tests
  The project includes unit and widget tests to verify core functionalities such as authentication validation, rating logic, and UI behavior. 
  To run all tests:
-* flutter test
+```bash
+flutter test
+```
