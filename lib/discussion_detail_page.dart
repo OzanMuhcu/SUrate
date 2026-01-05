@@ -205,7 +205,7 @@ class DiscussionDetailPage extends StatelessWidget {
                     discussion.id,
                     commentController.text.trim(),
                     user.uid,
-                    user.email?.split('@')[0] ?? "Anonymous",
+                    user.displayName ?? "Anonymous",
                     discussion.courseId,
                   );
 
@@ -227,4 +227,5 @@ class DiscussionDetailPage extends StatelessWidget {
         ],
       ),
     );
-  }}
+  }
+}

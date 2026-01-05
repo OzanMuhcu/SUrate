@@ -20,7 +20,7 @@ class DiscussionsPage extends StatelessWidget {
         ),
         centerTitle: true,
         title: const Text(
-          "CS204 Discussions",
+          "General Discussions",
           style: TextStyle(
             fontSize: 20,
             color: Colors.white,
@@ -129,7 +129,7 @@ class DiscussionsPage extends StatelessWidget {
                   titleController.text,
                   bodyController.text,
                   "CS204",
-                  user.email?.split('@')[0] ?? "Anonymous",
+                  user.displayName ?? "Anonymous",
                   user.uid,
                 );
                 Navigator.pop(ctx);
