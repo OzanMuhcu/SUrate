@@ -65,7 +65,7 @@ class _HomePageState extends State<HomePage> {
         title: Text(
           "SuRate",
           style: theme.textTheme.headlineSmall?.copyWith(
-            color: theme.colorScheme.onPrimary,
+            color: const Color(0xFF1565C0),
             fontWeight: FontWeight.bold,
           ),
         ),
