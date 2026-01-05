@@ -25,6 +25,8 @@ At Sabancı University, students traditionally rely on scattered sources like Wh
 - To demonstrate functionality, only 1–2 sample courses from each department were added.
 - Course data was intentionally limited due to time and scope constraints.
 - we were expected to implement 2 pages for each member. For better UI design, we added some buttons to profile page without impelemting their functionality. It is a future work.
+- While the UI includes buttons for **Change Username**, **Change Password**, and **Delete Account**, these functions are **not yet implemented** on the backend.
+- These buttons currently exist to demonstrate the intended UI design and user flow; their functional implementation is scheduled for future work.
 
 ## Known Bugs
 
