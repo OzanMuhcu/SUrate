@@ -14,7 +14,6 @@ At Sabancı University, students traditionally rely on scattered sources like Wh
 
 * **Secure Authentication:** Integration with Firebase Auth for secure Sign Up/Login.
 * **Course Ratings:** Detailed rating system for course content, grading, and difficulty. Course's overall rating represents it's difficulty (higher rate = more difficulty)
-* **Instructor Feedback:** Specific ratings for instructor effectiveness.
 * **Dynamic UI:** Dark/Light mode support and intuitive drawer navigation.
 * **Discussion Boards:** Thread-based comments for Q&A on specific courses.
 * **Search & Filter:** Advanced filtering by faculty and course level.
