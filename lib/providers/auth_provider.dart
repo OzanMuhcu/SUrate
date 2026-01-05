@@ -27,7 +27,12 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> register(String email, String password, String name) async {
     final user = await _authService.signUp(email, password);
-    await user?.updateDisplayName(name);
+    if (user != null) {
+      await user.updateDisplayName(name);
+      await user.reload();
+      _user = FirebaseAuth.instance.currentUser;
+      notifyListeners();
+    }
   }
 
   Future<void> logout() async {
